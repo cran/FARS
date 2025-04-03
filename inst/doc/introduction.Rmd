@@ -1,0 +1,201 @@
+---
+title: "Introduction to FARS"
+author: "Gian Pietro Bellocca"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+vignettes: true
+---
+
+# Introduction
+
+The `FARS` package provides a comprehensive framework for modeling and forecasting economic scenarios based on the Multilevel Dynamic Factor Model (MLDFM).
+
+# Installation
+
+```{r}
+
+# Install FARS from CRAN
+#install.packages("FARS")
+
+# Install FARS from GitHub
+#install.packages("devtools")
+#devtools::install_github("GPEBellocca/FARS")
+
+library(FARS)
+```
+
+# Input data
+
+```{r}
+library(zoo)
+library(readxl)
+# Input dep variable
+data_input_path <- system.file("extdata", "Data_IMF.xlsx", package = "FARS")
+data_input <- read_excel(data_input_path, sheet = "data")
+data_ts <- ts(data_input[, -1], frequency = 4)
+data_diff <- diff(log(data_ts)) * 400
+dep_variable <- data_diff[, 'United States', drop = FALSE] 
+dep_variable <- dep_variable[2:60]
+
+# Input data
+data_df_path <- system.file("extdata", "DataBase.xlsx", package = "FARS")
+data_df <- openxlsx::read.xlsx(data_df_path, sheet = "fulldata", cols = 2:625)
+data_df <- data_df[,1:519]
+data <- as.matrix(data_df)
+dimnames(data) <- NULL
+
+# Generate dates
+quarters <- as.yearqtr(seq(from = as.yearqtr("2005 Q2"), by = 0.25, length.out = 59))
+dates <- as.Date(quarters)
+
+```
+
+# MLDFM Model
+This section demonstrates how to use the mldfm function to fit the Multilevel Dynamic Factor Model using the input data.
+
+```{r}
+# MULTI-LEVEL DYNAMIC FACTOR MODEL
+# 3 blocks
+n_blocks <- 3 # 63 248 208
+block_ind <- c(63,311,519)
+r <- c(1,0,1,0,1,1,1)
+
+mldfm_result <- mldfm(data, 
+                      r=r, 
+                      blocks = n_blocks, 
+                      block_ind = block_ind , 
+                      tol = 1e-6, 
+                      max_iter = 1000,
+                      method = 0) 
+
+# Plot factors
+# plot(mldfm_result, dates = dates) 
+
+```
+# Subsampling
+
+```{r}
+# Subsampling
+n_samples <- 100
+sample_size <- 0.9
+mldfm_subsampling_result <- mldfm_subsampling(data, 
+                                         r=r, 
+                                         blocks = n_blocks, 
+                                         block_ind = block_ind , 
+                                         tol = 1e-6, 
+                                         max_iter = 1000, 
+                                         method = 0,
+                                         n_samples = n_samples,
+                                         sample_size = sample_size,
+                                         seed = 123) 
+```
+
+# Creating stressed scenarios
+
+```{r}
+# Create stressed scenario
+scenario <- create_scenario(model = mldfm_result,
+                                  subsample = mldfm_subsampling_result,
+                                  data = data, 
+                                  block_ind = block_ind, 
+                                  alpha=0.95)
+                                      
+```
+
+# FARS computation
+
+```{r}
+# Compute Quantiles
+fars_result <- compute_fars(dep_variable, 
+                              mldfm_result$Factors, 
+                              scenario = scenario, 
+                              h = 1,   
+                              edge = 0.05, 
+                              min = TRUE) 
+
+# Plot quantiles
+plot(fars_result,dates=dates)
+```
+
+# Density Estimation
+
+```{r}
+# Density 
+density <- nl_density(fars_result$Quantiles,  
+                             levels = fars_result$Levels,  
+                             est_points = 512, 
+                             random_samples = 100000,
+                             seed = 123)
+# Plot density
+# plot(density, time_index = dates)
+
+```
+
+# Growth-at-Risk (GaR)
+
+```{r}
+#GaR
+GaR0.05 <- quantile_risk(density, QTAU = 0.05)
+GaR0.50 <- quantile_risk(density, QTAU = 0.50)
+GaR0.95 <- quantile_risk(density, QTAU = 0.95)
+```
+
+# Scenario Density Estimation
+
+```{r}
+# Scenario Density 
+scenario_density <- nl_density(fars_result$Scenario_Quantiles,  
+                             levels = fars_result$Levels,  
+                             est_points = 512, 
+                             random_samples = 100000,
+                             seed = 123)
+
+```
+
+# Growth-in-Stress (GiS)
+
+```{r}
+#GiS
+GiS0.05 <- quantile_risk(scenario_density, QTAU = 0.05)
+GiS0.25 <- quantile_risk(scenario_density, QTAU = 0.25)
+GiS0.50 <- quantile_risk(scenario_density, QTAU = 0.50)
+GiS0.75 <- quantile_risk(scenario_density, QTAU = 0.75)
+GiS0.95 <- quantile_risk(scenario_density, QTAU = 0.95)
+
+```
+
+# Final GaR and GiS Plot
+
+```{r}
+# Final GaR and GiS plot
+library(ggplot2)
+
+time <- dates[-1]
+
+MLGaRGiS <- data.frame(
+  time = time,
+  dep_variable = as.vector(dep_variable[2:59]),
+  GaR.05 = as.vector(GaR0.05[1:58]),
+  GaR.95 = as.vector(GaR0.95[1:58]),
+  GiS.05 = as.vector(GiS0.05[1:58]), 
+  GiS.25 = as.vector(GiS0.25[1:58]),
+  GiS.75 = as.vector(GiS0.75[1:58]),
+  GiS.95 = as.vector(GiS0.95[1:58])
+)
+
+
+p <- ggplot(MLGaRGiS,aes(x=time,y=dep_variable)) + 
+  geom_line() + theme_bw()+
+  geom_ribbon(aes(ymin=GiS.05,ymax=GiS.95), alpha=0.1, fill="red") +
+  geom_ribbon(aes(ymin=GiS.25,ymax=GiS.75), alpha=0.1, fill="grey10") +
+  geom_line(aes(x=time, GaR.05), linewidth=0.1, colour="black", linetype="dashed") +
+  geom_line(aes(x=time, GaR.95), linewidth=0.1, colour="black", linetype="dashed") +
+  scale_y_continuous("Growth") +
+  scale_x_date(date_labels = "%Y", date_breaks = "2 years") +
+  theme(axis.text.x = element_text(angle = 90))
+fig <- plotly::ggplotly(p)
+fig
+```
