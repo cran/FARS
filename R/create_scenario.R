@@ -18,11 +18,11 @@ beta_ols <- function(X, Y) {
 #' 
 #' @examples
 #' \donttest{
-#' data <- matrix(rnorm(1000), nrow = 100, ncol = 519)
-#' block_ind <- c(63, 311, 519)  # Defines 3 blocks
-#' r <- c(1, 1, 1, 1, 1, 1, 1)   # 2^3 - 1 = 7 nodes
-#' mldfm_result <- mldfm(data, blocks = 3, block_ind = block_ind, r = r)
-#' mldfm_subsampling_result <- mldfm_subsampling(data, blocks = 3, block_ind = block_ind, r = r, 
+#' data <- matrix(rnorm(100*300), nrow = 100, ncol = 300)
+#' block_ind <- c(150, 300)  # Defines 3 blocks
+#' r <- c(1, 1, 1)   # 2^2 - 1 = 4 nodes
+#' mldfm_result <- mldfm(data, blocks = 2, block_ind = block_ind, r = r)
+#' mldfm_subsampling_result <- mldfm_subsampling(data, blocks = 2, block_ind = block_ind, r = r, 
 #' n_samples = 100, sample_size = 0.9)
 #' scenario <- create_scenario(mldfm_result, mldfm_subsampling_result, data, block_ind, alpha = 0.95)
 #' }
@@ -49,17 +49,22 @@ create_scenario <- function(model, subsamples, data, block_ind, alpha=0.95) {
   
   # Extract model factors
   Factors <- model$Factors
+  Loadings <- model$Lambda
+  #Loadings <-t((1/nrow(Factors))*t(Factors)%*%data)
+  Residuals <- model$Residuals
+  #Residuals<-data-Factors%*%t(Loadings)
   Factors_list <- model$Factors_list
   
-  #Extraxt subsample (factors and factors_hat)
+ 
+  #Extraxt subsample 
   Factors_samples <- lapply(subsamples, function(obj) obj$Factors) 
-  Factors_hat_samples <- lapply(subsamples, function(obj) obj$Factors_hat)
   
-  
-  
+  # Initialize
   n_obs <- nrow(Factors)
+  n_var <- nrow(Loadings)
   tot_n_factors <-  ncol(Factors)
   n_samples <- length(subsamples)
+  n_var_sample <- nrow(subsamples[[1]]$Lambda)
   
   
   # Define block ranges and count the number of variables in each range
@@ -93,81 +98,62 @@ create_scenario <- function(model, subsamples, data, block_ind, alpha=0.95) {
     # initialize Sigma diagonal for current obs
     Sigma_diag <- c()
     factor_index <- 1
-    
     Sigma <- matrix(0, nrow = tot_n_factors, ncol = tot_n_factors)
     
-    # loop over  factors
-    for (key in names(Factors_list)){
-      
-      # Extract data
-      combination <- as.numeric(unlist(strsplit(key, "-")))
-      Block <- do.call(cbind, lapply(combination, function(idx) data[, ranges[[idx]]]))
-      n_factors <- Factors_list[[key]]
     
-      # Extract corresponding factors
-      Facts <- Factors[,factor_index:(factor_index+n_factors-1)]
+    # Compute Gamma
+    Gamma <- matrix(0, nrow = ncol(Factors), ncol = ncol(Factors))
+    for(v in 1:n_var){
+      term <- (Loadings[v,] %*% t(Loadings[v,]))*(Residuals[obs,v]^2)
       
-      # Compute Loadings and Residuals
-      Loads <- beta_ols(Facts, Block)
-      Resid <- Block - Facts %*% Loads
-      
-      # Compute Factors Hat
-      N <- ncol(Loads)
-      Facts_hat<-(1/N)*Block%*%t(Loads)
-      
-      # Compute number of variables
-      n_var <- ncol(Loads)
-      
-      # Compute the inverse of the loading matrix
-      inv_Loads <- solve((Loads %*% t(Loads)) / n_var)
-      
-      # Compute Gamma
-      Gamma <- matrix(0, nrow = ncol(Facts_hat), ncol = ncol(Facts_hat))
-      for(v in 1:n_var){
-        term <- (Loads[,v] %*% t(Loads[,v]))*(Resid[obs,v]^2)
-        Gamma <- Gamma + term
-      }
-      
-      Gamma <- Gamma / n_var
-      
-      
-      # Compute Sigma
-      term2 <- matrix(0, nrow = ncol(Facts_hat), ncol = ncol(Facts_hat))
-      for(s in 1:n_samples){
-        # Extract sample's Factors
-        Factors_hat_s <- Factors_hat_samples[[s]]
-        Facts_hat_s <- Factors_hat_s[,factor_index:(factor_index+n_factors-1)]
-        Facts_hat_s <- as.matrix(Facts_hat_s) # impose matrix structure 
-        
-        # Extract current obs
-        Facts_hat_s_obs <- Facts_hat_s[obs,]
-        Facts_hat_obs <- Facts_hat[obs,]
-        
-        # Compute diff
-        diff <- Facts_hat_s_obs - Facts_hat_obs
-        term2 <- term2 + (diff %*% t(diff)) 
-        
-      }
-      
-      Sig <- inv_Loads %*% ((term2/n_samples)+Gamma) %*% inv_Loads
-      size <- ncol(Sig)
-      
-      Sigma[factor_index:(factor_index + size - 1), factor_index:(factor_index + size - 1)] <- Sig
-      
-      
-      factor_index <- factor_index + n_factors
-    
+      Gamma <- Gamma + term
     }
+    
+    Gamma <- Gamma / n_var
+    
+    
+    # Compute the inverse of the loading matrix
+    inv_Loads <- solve((t(Loadings) %*% Loadings) / n_var)
+      
+    # Compute Sigma
+    term2 <- matrix(0, nrow = ncol(Factors), ncol = ncol(Factors))
+    for(s in 1:n_samples){
+      Factors_sample <- Factors_samples[[s]]
+      Factors_sample <- as.matrix(Factors_sample)
+      
+      
+      
+      # Align signs to the original factors
+      for (ff in 1:tot_n_factors) {
+        inv_sample <- (-1) * Factors_sample[, ff]
+        dif1 <- sum(abs(Factors[, ff] - Factors_sample[, ff]))
+        dif2 <- sum(abs(Factors[, ff] - inv_sample))
+
+        if (dif2 < dif1) {
+          Factors_sample[, ff] <- inv_sample
+        }
+      }
+
+      
+      
+      Factors_obs <- Factors[obs,,drop = FALSE]
+      Factors_sample_obs <- Factors_sample[obs,,drop = FALSE]
+      
+     
+      diff <- Factors_sample_obs - Factors_obs
+      term2 <- term2 + (t(diff) %*% diff) 
+      
+    }
+    
    
-    #Sigma <- diag(Sigma_diag)
-    #Sigma <- Sig
-   
-    # Store the sigma matrix for this observation
-    Sigma_list[[obs]] <- Sigma
-  
-   
+    #Sig <- inv_Loads %*% ((term2/n_samples)+Gamma) %*% inv_Loads
+    #Sig <- (1/n_var) * inv_Loads %*%  Gamma %*% inv_Loads + (n_var_sample/(n_var*n_samples)*term2)
+    Sig <-  inv_Loads %*%  Gamma %*% inv_Loads + (n_var_sample/(n_var*n_samples)*term2)
+    
+    Sigma_list[[obs]] <- Sig
   }
-  
+ 
+   
   # Hyperellipsoids 
   Hyperellipsoids <- list()
   
@@ -175,12 +161,14 @@ create_scenario <- function(model, subsamples, data, block_ind, alpha=0.95) {
   for (obs in 1:n_obs) {
     
     center_obs <- CenterHE_matrix[obs,]
-    sigma_obs <- Sigma_list[[obs]]     
+    sigma_obs <- Sigma_list[[obs]]    
     
-    calpha <- sizeparam_normal_distn(alpha, d=n_factors)  # Size parameter 
+   
+    
+    calpha <- sizeparam_normal_distn(alpha, d=tot_n_factors)  # Size parameter 
     #calpha <- qchisq(alpha, df = tot_n_factors)
     
-    
+
     if(tot_n_factors > 2){
       # more than 2 dimensions
       hellip <- hyperellipsoid(center_obs, solve(sigma_obs), calpha)

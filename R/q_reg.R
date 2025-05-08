@@ -16,6 +16,15 @@ q_reg <- function(dep_variable, factors, h=1,  QTAU=0.05,  scenario = NULL, min 
   r <- ncol(factors)
 
   
+  index_list <- c(
+    1308, 2172, 2172, 2748, 2748, 2748, 2026, 1310, 2172, 1884,
+    1844, 1844, 2132, 732, 1844, 1844, 1818, 1811, 734, 1844,
+    1844, 2132, 1844, 1884, 1884, 1884, 1884, 1884, 1884, 1884,
+    1884, 1884, 1738, 1884, 2132, 1884, 1844, 1844, 1844, 782,
+    1844, 1844, 1844, 1844, 1844, 1844, 1844, 1844, 1844, 1844,
+    1844, 1844, 1844, 1844, 1836, 1844, 1844, 1836, 1844
+  )
+  
   # Prepare regression data
   Y <- dep_variable
   LagY<-shift(Y,h)
@@ -79,9 +88,11 @@ q_reg <- function(dep_variable, factors, h=1,  QTAU=0.05,  scenario = NULL, min 
     
     if(min == TRUE){
       value <- min(pred)
+      #index <- which.min(pred)
     }else{
       value <- max(pred)
     }
+    
     Scenario_Pred_q[tt] <- value
   }
     

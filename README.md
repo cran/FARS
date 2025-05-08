@@ -2,6 +2,8 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/GPEBellocca/FARS/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/GPEBellocca/FARS/actions/workflows/R-CMD-check.yaml)
+[![CRAN status](https://www.r-pkg.org/badges/version/FARS)](https://CRAN.R-project.org/package=FARS)
+![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/FARS)
 <!-- badges: end -->
 
 The `FARS` package provides a comprehensive framework in R for modeling and forecasting economic scenarios based on the multi-level dynamic factor model (MLDFM). The package enables users to:

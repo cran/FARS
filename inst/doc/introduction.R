@@ -31,6 +31,10 @@ dimnames(data) <- NULL
 quarters <- as.yearqtr(seq(from = as.yearqtr("2005 Q2"), by = 0.25, length.out = 59))
 dates <- as.Date(quarters)
 
+# Correct outliers
+outliers_result <- correct_outliers(data, 5 )
+data <- outliers_result$data
+
 
 ## -----------------------------------------------------------------------------
 # MULTI-LEVEL DYNAMIC FACTOR MODEL
@@ -64,7 +68,7 @@ mldfm_subsampling_result <- mldfm_subsampling(data,
                                          method = 0,
                                          n_samples = n_samples,
                                          sample_size = sample_size,
-                                         seed = 123) 
+                                         seed = 42) 
 
 ## -----------------------------------------------------------------------------
 # Create stressed scenario
@@ -85,17 +89,17 @@ fars_result <- compute_fars(dep_variable,
                               min = TRUE) 
 
 # Plot quantiles
-plot(fars_result,dates=dates)
+#plot(fars_result,dates=dates)
 
 ## -----------------------------------------------------------------------------
 # Density 
-density <- nl_density(fars_result$Quantiles,  
+density <- density(fars_result$Quantiles,  
                              levels = fars_result$Levels,  
                              est_points = 512, 
                              random_samples = 100000,
-                             seed = 123)
+                             seed = 42)
 # Plot density
-# plot(density, time_index = dates)
+#plot(density, time_index = dates)
 
 
 ## -----------------------------------------------------------------------------
@@ -106,18 +110,17 @@ GaR0.95 <- quantile_risk(density, QTAU = 0.95)
 
 ## -----------------------------------------------------------------------------
 # Scenario Density 
-scenario_density <- nl_density(fars_result$Scenario_Quantiles,  
+scenario_density <- density(fars_result$Scenario_Quantiles,  
                              levels = fars_result$Levels,  
                              est_points = 512, 
                              random_samples = 100000,
-                             seed = 123)
+                             seed = 42)
 
 
 ## -----------------------------------------------------------------------------
 #GiS
 GiS0.05 <- quantile_risk(scenario_density, QTAU = 0.05)
 GiS0.25 <- quantile_risk(scenario_density, QTAU = 0.25)
-GiS0.50 <- quantile_risk(scenario_density, QTAU = 0.50)
 GiS0.75 <- quantile_risk(scenario_density, QTAU = 0.75)
 GiS0.95 <- quantile_risk(scenario_density, QTAU = 0.95)
 
@@ -125,7 +128,6 @@ GiS0.95 <- quantile_risk(scenario_density, QTAU = 0.95)
 ## -----------------------------------------------------------------------------
 # Final GaR and GiS plot
 library(ggplot2)
-
 time <- dates[-1]
 
 MLGaRGiS <- data.frame(
@@ -150,5 +152,5 @@ p <- ggplot(MLGaRGiS,aes(x=time,y=dep_variable)) +
   scale_x_date(date_labels = "%Y", date_breaks = "2 years") +
   theme(axis.text.x = element_text(angle = 90))
 fig <- plotly::ggplotly(p)
-fig
+#fig
 

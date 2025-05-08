@@ -15,7 +15,6 @@
 #' @return An object of class \code{mldfm}, which is a list containing the following components:
 #' \describe{
 #'   \item{Factors}{Matrix of estimated factors.}
-#'   \item{Factors_hat}{Matrix of estimated hat factors.}
 #'   \item{Lambda}{Matrix of factor loadings.}
 #'   \item{Residuals}{Matrix of residuals.}
 #'   \item{Iterations}{Number of iterations before convergence.}
@@ -23,11 +22,13 @@
 #' }
 #'
 #' @examples
+#' \donttest{
 #' data <- matrix(rnorm(1000), nrow = 100, ncol = 519)
 #' block_ind <- c(63, 311, 519)  # Defines 3 blocks
 #' r <- c(1, 1, 1, 1, 1, 1, 1)   # 2^3 - 1 = 7 nodes
 #' result <- mldfm(data, blocks = 3, block_ind = block_ind, r = r)
 #' summary(result)
+#'}
 #'
 #' @export
 mldfm <- function(data, blocks = 1, block_ind = NULL, r = c(1), method = 0, tol = 1e-6, max_iter = 1000, verbose = TRUE) {
@@ -54,7 +55,6 @@ mldfm <- function(data, blocks = 1, block_ind = NULL, r = c(1), method = 0, tol 
   
   output <- list(
     Factors = result$Factors,
-    Factors_hat = result$Factors_hat,
     Lambda = result$Lambda,
     Residuals = result$Residuals,
     Method = result$Method,

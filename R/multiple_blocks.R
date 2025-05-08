@@ -47,6 +47,8 @@ multiple_blocks<-function(Yorig, r, block_ind, tol, max_iter, method){
   InitialFactors <- init_res$InitialFactors
   Factor_list <- init_res$Factor_list
   
+  
+  
  
   # --- STEP 2: ITERATIVE OPTIMIZATION ---
   RSS_previous <- Inf
@@ -69,10 +71,15 @@ multiple_blocks<-function(Yorig, r, block_ind, tol, max_iter, method){
     
     # Update factor list
     Factor_list <- update_factor_list(Factor_list, FinalFactors, r)
-
+    
     # Compute RSS and check convergence
     FinalResiduals <- Yorig - FinalFactors %*% Lambda
     RSS_new <- sum(FinalResiduals^2)
+    
+    
+    RSS_new <- Re(RSS_new)
+    RSS_previous <- Re(RSS_previous)
+    
     
     if ((log(RSS_previous) - log(RSS_new)) < tol) break  # Converged
     
@@ -88,6 +95,8 @@ multiple_blocks<-function(Yorig, r, block_ind, tol, max_iter, method){
   orthogonal_FinalFactors <- Id_res$FinalFactors
   Factor_list <- Id_res$Factor_list
   Lambda <- Id_res$Lambda
+
+  
   
   
   # Final residuals
@@ -102,15 +111,15 @@ multiple_blocks<-function(Yorig, r, block_ind, tol, max_iter, method){
   
   
   # Compute Factors_hat
-  Factors_hat <- compute_factors_hat(Yorig, ranges, Final_list,Loadings_list)
-    
+  #Factors_hat <- compute_factors_hat2(Yorig, ranges, Factor_list,Loadings_list)
+
+  
   # Drop column names
   orthogonal_FinalFactors <- unname(orthogonal_FinalFactors)
   
   
   # Collect results
   results$Factors <- orthogonal_FinalFactors
-  results$Factors_hat <- Factors_hat
   results$Lambda <- t(Lambda)
   results$Residuals <- Residuals
   if(method == 0){

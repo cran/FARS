@@ -36,7 +36,6 @@ mldfm(
 An object of class \code{mldfm}, which is a list containing the following components:
 \describe{
 \item{Factors}{Matrix of estimated factors.}
-\item{Factors_hat}{Matrix of estimated hat factors.}
 \item{Lambda}{Matrix of factor loadings.}
 \item{Residuals}{Matrix of residuals.}
 \item{Iterations}{Number of iterations before convergence.}
@@ -48,10 +47,12 @@ Estimates a multilevel dynamic factor model from time series data.
 Supports both single-block and hierarchical multi-block structures with customizable factor extraction settings.
 }
 \examples{
+\donttest{
 data <- matrix(rnorm(1000), nrow = 100, ncol = 519)
 block_ind <- c(63, 311, 519)  # Defines 3 blocks
 r <- c(1, 1, 1, 1, 1, 1, 1)   # 2^3 - 1 = 7 nodes
 result <- mldfm(data, blocks = 3, block_ind = block_ind, r = r)
 summary(result)
+}
 
 }

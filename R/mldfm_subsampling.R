@@ -17,10 +17,10 @@
 #' 
 #' @examples
 #' \donttest{
-#' data <- matrix(rnorm(1000), nrow = 100, ncol = 519)
-#' block_ind <- c(63, 311, 519)  # Defines 3 blocks
-#' r <- c(1, 1, 1, 1, 1, 1, 1)   # 2^3 - 1 = 7 nodes
-#' result <- mldfm_subsampling(data, blocks = 3, block_ind = block_ind, r = r, 
+#' data <- matrix(rnorm(1000), nrow = 100, ncol = 100)
+#' block_ind <- c(50,100)  # Defines 3 blocks
+#' r <- c(1, 1, 1)   # 2^2 - 1 = 3 nodes
+#' result <- mldfm_subsampling(data, blocks = 2, block_ind = block_ind, r = r, 
 #' n_samples = 100, sample_size = 0.9)
 #' }
 #' 

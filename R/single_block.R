@@ -7,6 +7,8 @@ single_block <- function(data, r) {
   
   # Standardize the data 
   X <- scale(data, center = TRUE, scale = TRUE)
+
+ 
   
   # Dimensions
   T <- nrow(X)
@@ -22,7 +24,7 @@ single_block <- function(data, r) {
   Lambda <- (1 / T) * t(Factors) %*% X
   
   # Estimate reconstructed factors (F_hat)
-  F_hat <- (1 / N) * X %*% t(Lambda)
+  #F_hat <- (1 / N) * X %*% t(Lambda)
   
   # Residuals 
   Residuals <- X - Factors %*% Lambda
@@ -36,7 +38,6 @@ single_block <- function(data, r) {
   
   return(list(
     Factors = Factors,
-    Factors_hat = F_hat,
     Lambda = t(Lambda),
     Residuals = Residuals,
     Method = "PCA",
