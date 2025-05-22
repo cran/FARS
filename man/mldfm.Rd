@@ -8,7 +8,9 @@ mldfm(
   data,
   blocks = 1,
   block_ind = NULL,
-  r = c(1),
+  global = 1,
+  local = NULL,
+  middle_layer = NULL,
   method = 0,
   tol = 1e-06,
   max_iter = 1000,
@@ -22,7 +24,11 @@ mldfm(
 
 \item{block_ind}{Integer vector. End column indices for each block. Must be of length \code{blocks} and in increasing order.}
 
-\item{r}{Integer vector of length \code{2^blocks - 1}. Specifies the number of factors for each node in the hierarchical structure.}
+\item{global}{Integer. Number of global factors extracted from the entire dataset.}
+
+\item{local}{Integer vector of length \code{blocks}. Specifies the number of local factors for each block.}
+
+\item{middle_layer}{Named list. Each name is a string specifying a group of blocks (e.g., \code{"1-3"} or \code{"2-3"}), and each value is the number of factors to extract.}
 
 \item{method}{Integer.  Method used to initialize the factors: \code{0} for Canonical Correlation Analysis (CCA), \code{1} for Principal Component Analysis (PCA).}
 
@@ -50,8 +56,10 @@ Supports both single-block and hierarchical multi-block structures with customiz
 \donttest{
 data <- matrix(rnorm(1000), nrow = 100, ncol = 519)
 block_ind <- c(63, 311, 519)  # Defines 3 blocks
-r <- c(1, 1, 1, 1, 1, 1, 1)   # 2^3 - 1 = 7 nodes
-result <- mldfm(data, blocks = 3, block_ind = block_ind, r = r)
+local <- c(1, 1, 1)           # One local factor per block
+middle_layer <- list("1-3" = 1)
+result <- mldfm(data, blocks = 3, block_ind = block_ind, global = 1, 
+local = local, middle_layer = middle_layer)
 summary(result)
 }
 

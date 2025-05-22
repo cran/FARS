@@ -4,7 +4,7 @@
 \alias{compute_subsample}
 \title{Internal helper to compute a column-wise subsample of the data by block}
 \usage{
-compute_subsample(data, block_ind, n, r, sample_size = 1, seed = NULL)
+compute_subsample(data, block_ind, n, sample_size = 1, seed = NULL)
 }
 \description{
 Internal helper to compute a column-wise subsample of the data by block

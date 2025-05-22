@@ -4,7 +4,7 @@
 \alias{update_factor_list}
 \title{Update Factor List from a given Factor Matrix}
 \usage{
-update_factor_list(Factor_list, FinalFactors, r)
+update_factor_list(Factor_list, FinalFactors, r_list)
 }
 \description{
 Update Factor List from a given Factor Matrix

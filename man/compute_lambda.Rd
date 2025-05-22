@@ -4,15 +4,7 @@
 \alias{compute_lambda}
 \title{Compute Loadings (Lambda Matrix)}
 \usage{
-compute_lambda(
-  Yorig,
-  num_blocks,
-  ranges,
-  num_factors,
-  r,
-  Factor_list,
-  Loadings_list
-)
+compute_lambda(Yorig, num_blocks, ranges, r_list, Factor_list, Loadings_list)
 }
 \description{
 Computes the full loadings matrix (Lambda) for the multilevel dynamic factor model,

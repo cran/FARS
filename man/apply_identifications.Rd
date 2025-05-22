@@ -8,8 +8,7 @@ apply_identifications(
   Yorig,
   num_blocks,
   ranges,
-  num_factors,
-  r,
+  r_list,
   currentFactors,
   Factor_list,
   Loadings_list

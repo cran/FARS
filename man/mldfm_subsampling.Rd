@@ -8,7 +8,9 @@ mldfm_subsampling(
   data,
   blocks = 1,
   block_ind = NULL,
-  r = c(1),
+  global = 1,
+  local = NULL,
+  middle_layer = NULL,
   method = 0,
   tol = 1e-06,
   max_iter = 1000,
@@ -24,7 +26,11 @@ mldfm_subsampling(
 
 \item{block_ind}{A vector of integers indicating the end index of each block. Must be of length \code{blocks} and in increasing order. Required if \code{blocks > 1}.}
 
-\item{r}{A vector of integers specifying the number of factors to extract for each node in the block hierarchy. Its length must equal \code{2^blocks - 1}, corresponding to all nodes in the hierarchical tree.}
+\item{global}{Integer. Number of global factors extracted from the entire dataset.}
+
+\item{local}{Integer vector of length \code{blocks}. Specifies the number of local factors for each block.}
+
+\item{middle_layer}{Named list. Each name is a string specifying a group of blocks (e.g., \code{"1-3"} or \code{"2-3"}), and each value is the number of factors to extract.}
 
 \item{method}{Integer. The method used to initialize the factors: \code{0} for Canonical Correlation Analysis (CCA), \code{1} for Principal Component Analysis (PCA).}
 
@@ -48,9 +54,9 @@ Repeatedly applies the MLDFM estimation to randomly drawn subsamples of the inpu
 \donttest{
 data <- matrix(rnorm(1000), nrow = 100, ncol = 100)
 block_ind <- c(50,100)  # Defines 3 blocks
-r <- c(1, 1, 1)   # 2^2 - 1 = 3 nodes
-result <- mldfm_subsampling(data, blocks = 2, block_ind = block_ind, r = r, 
-n_samples = 100, sample_size = 0.9)
+local <- c(1, 1)   
+result <- mldfm_subsampling(data, blocks = 2, block_ind = block_ind, global = 1, 
+local = local, n_samples = 100, sample_size = 0.9)
 }
 
 }

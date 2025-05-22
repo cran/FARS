@@ -19,12 +19,16 @@ beta_ols <- function(X, Y) {
 #' @examples
 #' \donttest{
 #' data <- matrix(rnorm(100*300), nrow = 100, ncol = 300)
-#' block_ind <- c(150, 300)  # Defines 3 blocks
-#' r <- c(1, 1, 1)   # 2^2 - 1 = 4 nodes
-#' mldfm_result <- mldfm(data, blocks = 2, block_ind = block_ind, r = r)
-#' mldfm_subsampling_result <- mldfm_subsampling(data, blocks = 2, block_ind = block_ind, r = r, 
-#' n_samples = 100, sample_size = 0.9)
-#' scenario <- create_scenario(mldfm_result, mldfm_subsampling_result, data, block_ind, alpha = 0.95)
+#' block_ind <- c(150, 300)  # Defines 2 blocks
+#' global = 1
+#' local <- c(1, 1)   
+#' mldfm_result <- mldfm(data, blocks = 2, block_ind = block_ind, 
+#' global = global, local = local)
+#' mldfm_subsampling_result <- mldfm_subsampling(data, blocks = 2, 
+#' block_ind = block_ind, global = global, 
+#' local = local, n_samples = 100, sample_size = 0.9)
+#' scenario <- create_scenario(mldfm_result, mldfm_subsampling_result, 
+#' data, block_ind, alpha = 0.95)
 #' }
 #'
 #' @import ellipse
@@ -145,11 +149,8 @@ create_scenario <- function(model, subsamples, data, block_ind, alpha=0.95) {
       
     }
     
-   
-    #Sig <- inv_Loads %*% ((term2/n_samples)+Gamma) %*% inv_Loads
-    #Sig <- (1/n_var) * inv_Loads %*%  Gamma %*% inv_Loads + (n_var_sample/(n_var*n_samples)*term2)
-    Sig <-  inv_Loads %*%  Gamma %*% inv_Loads + (n_var_sample/(n_var*n_samples)*term2)
-    
+    Sig <- (1/n_var) * inv_Loads %*%  Gamma %*% inv_Loads + (n_var_sample/(n_var*n_samples)*term2) # maldonado and ruiz
+
     Sigma_list[[obs]] <- Sig
   }
  
@@ -163,11 +164,7 @@ create_scenario <- function(model, subsamples, data, block_ind, alpha=0.95) {
     center_obs <- CenterHE_matrix[obs,]
     sigma_obs <- Sigma_list[[obs]]    
     
-   
-    
     calpha <- sizeparam_normal_distn(alpha, d=tot_n_factors)  # Size parameter 
-    #calpha <- qchisq(alpha, df = tot_n_factors)
-    
 
     if(tot_n_factors > 2){
       # more than 2 dimensions

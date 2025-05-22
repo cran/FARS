@@ -10,8 +10,7 @@ compute_initial_factors(
   num_obs,
   num_blocks,
   ranges,
-  num_factors,
-  r,
+  r_list,
   method
 )
 }

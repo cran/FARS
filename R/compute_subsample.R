@@ -1,7 +1,7 @@
 #' Internal helper to compute a column-wise subsample of the data by block
 #'
 #' @keywords internal
-compute_subsample <- function(data, block_ind, n,r,sample_size = 1, seed = NULL) {
+compute_subsample <- function(data, block_ind, n,sample_size = 1, seed = NULL) {
   
   # Set seed once to ensure reproducibility
   if (!is.null(seed)) {
