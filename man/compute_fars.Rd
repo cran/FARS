@@ -10,7 +10,8 @@ compute_fars(
   h = 1,
   edge = 0.05,
   scenario = NULL,
-  min = TRUE
+  min = TRUE,
+  QTAU = 0.05
 )
 }
 \arguments{
@@ -25,15 +26,19 @@ compute_fars(
 \item{scenario}{Optional list of matrices representing a stressed scenario, as returned by \code{create_scenario()}.}
 
 \item{min}{Logical. If \code{TRUE} (default), implement a stepwise minimization. If \code{FALSE}, implement a stepwise maximization.}
+
+\item{QTAU}{Numeric. Quantile level (default \code{0.05}) used to compute stressed factors via \code{compute_stressed_factors()}. Only used if \code{scenario} is provided.}
 }
 \value{
 A list containing:
 \describe{
 \item{\code{Quantiles}}{Matrix of forecasted quantiles (rows = time, cols = quantile levels).}
-\item{\code{Scenario_Quantiles}}{Matrix of stressed scenario quantiles (same format), returned only if \code{scenario} is provided.}
+\item{\code{Strssed_Quantiles}}{Matrix of stressed scenario quantiles (same format), returned only if \code{scenario} is provided.}
 \item{\code{Coeff}}{Matrix of quantile regression coefficients for each quantile.}
 \item{\code{Std. Error}}{Matrix of Std. Error for each regression coefficient.}
 \item{\code{Pvalue}}{Matrix of p-values for each regression coefficient.}
+\item{\code{QTAU}}{The quantile level used to compute stressed factors (if applicable).}
+\item{\code{Stressed_Factors}}{Matrix of selected stressed factors (only if \code{scenario} is provided and \code{QTAU} is set).}
 }
 }
 \description{
@@ -48,7 +53,7 @@ block_ind <- c(150, 300)  # Defines 2 blocks
 global = 1
 local <- c(1, 1)   
 mldfm_result <- mldfm(data, blocks = 2, block_ind = block_ind, global = global , local = local)
-fars_result <- compute_fars(dep_variable, mldfm_result$Factors, h = 1, edge = 0.05, min = TRUE)
+fars_result <- compute_fars(dep_variable, mldfm_result$Factors, h = 1, edge = 0.05)
 }
  
  

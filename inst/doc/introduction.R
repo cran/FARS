@@ -63,7 +63,7 @@ mldfm_result <- mldfm(data,
 ## -----------------------------------------------------------------------------
 # Subsampling
 n_samples <- 100
-sample_size <- 0.9
+sample_size <- 0.94
 mldfm_subsampling_result <- mldfm_subsampling(data, 
                                          global = global, 
                                          local = local,
@@ -81,9 +81,8 @@ mldfm_subsampling_result <- mldfm_subsampling(data,
 # Create stressed scenario
 scenario <- create_scenario(model = mldfm_result,
                                   subsample = mldfm_subsampling_result,
-                                  data = data, 
-                                  block_ind = block_ind, 
-                                  alpha=0.95)
+                                  alpha=0.95,
+                                  atcsr=FALSE)
                                       
 
 ## -----------------------------------------------------------------------------
@@ -93,8 +92,8 @@ fars_result <- compute_fars(dep_variable,
                               scenario = scenario, 
                               h = 1,   
                               edge = 0.05, 
-                              min = TRUE) 
-
+                              min = TRUE,
+                              QTAU = 0.05) 
 # Plot quantiles
 #plot(fars_result,dates=dates)
 
@@ -111,13 +110,11 @@ density <- density(fars_result$Quantiles,
 
 ## -----------------------------------------------------------------------------
 #GaR
-GaR0.05 <- quantile_risk(density, QTAU = 0.05)
-GaR0.50 <- quantile_risk(density, QTAU = 0.50)
-GaR0.95 <- quantile_risk(density, QTAU = 0.95)
+GaR <- quantile_risk(density, QTAU = 0.05)
 
 ## -----------------------------------------------------------------------------
 # Scenario Density 
-scenario_density <- density(fars_result$Scenario_Quantiles,  
+scenario_density <- density(fars_result$Stressed_Quantiles,  
                              levels = fars_result$Levels,  
                              est_points = 512, 
                              random_samples = 100000,
@@ -126,9 +123,5 @@ scenario_density <- density(fars_result$Scenario_Quantiles,
 
 ## -----------------------------------------------------------------------------
 #GiS
-GiS0.05 <- quantile_risk(scenario_density, QTAU = 0.05)
-GiS0.25 <- quantile_risk(scenario_density, QTAU = 0.25)
-GiS0.75 <- quantile_risk(scenario_density, QTAU = 0.75)
-GiS0.95 <- quantile_risk(scenario_density, QTAU = 0.95)
-
+GiS0 <- quantile_risk(scenario_density, QTAU = 0.05)
 

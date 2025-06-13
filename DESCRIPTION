@@ -1,7 +1,7 @@
 Package: FARS
 Type: Package
 Title: Factor-Augmented Regression Scenarios
-Version: 0.3.0
+Version: 0.4.0
 Authors@R: c(person("Gian Pietro", "Bellocca", email = "gbellocc@est-econ.uc3m.es", role = c("aut", "cre")),
              person("Ignacio", "Garrón", role = c("aut")),
              person("Vladimir", "Rodríguez-Caballero", role = c("aut")),
@@ -17,10 +17,10 @@ License: GPL (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 NeedsCompilation: no
-Packaged: 2025-05-22 09:51:01 UTC; gianpietro
+Packaged: 2025-06-13 07:28:10 UTC; gianpietro
 Author: Gian Pietro Bellocca [aut, cre],
   Ignacio Garrón [aut],
   Vladimir Rodríguez-Caballero [aut],
   Esther Ruiz [aut]
 Repository: CRAN
-Date/Publication: 2025-05-22 10:50:05 UTC
+Date/Publication: 2025-06-13 08:20:02 UTC

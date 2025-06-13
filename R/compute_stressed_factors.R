@@ -1,18 +1,17 @@
-#' Quantile Regression with Stressed Scenario Projection
-#'
-#' Estimates quantile regressions of a dependent variable on dynamic factors.
+#' Compute Stressed Factors
 #'
 #' @import quantreg
 #' @importFrom stats as.formula
 #' 
 #' @keywords internal
 #' 
-q_reg <- function(dep_variable, factors, Stressed_Factors = NULL,  h=1,  QTAU=0.05) {
+compute_stressed_factors <- function(dep_variable, factors, scenario, h, QTAU, min) {
   
   
   t <- nrow(factors)
   r <- ncol(factors)
 
+  
   
   # Prepare regression data
   Y <- dep_variable
@@ -38,28 +37,22 @@ q_reg <- function(dep_variable, factors, Stressed_Factors = NULL,  h=1,  QTAU=0.
   fit_q <- rq(formula, tau = QTAU, data = reg_data)
   summary_fit <- summary(fit_q, se = "ker",covariance=TRUE)
   coefficients <- summary_fit$coefficients[, 1]
-  pvalues <- summary_fit$coefficients[, 4] 
-  std_errors <- summary_fit$coefficients[, 2]
-  
-  
  
-  # Predict quantile with estimated factors
-  Pred_q <- coefficients[1] + coefficients[2] * Y + as.numeric(factors %*% coefficients[3:(2 + r)])
+  
+  # Initialize stressed factor matrix
+  stressed_factors <- matrix(NA, nrow = t, ncol = r)
+  
+  # Loop over time to compute stressed factors
+  for (tt in 1:t){
+    ellips <- scenario[[tt]]
+    pred <- coefficients[1] + coefficients[2] * Y[tt] + ellips %*% coefficients[3:(2 + r)]
+    index <- if (min) which.min(pred) else which.max(pred)
+    stressed_factors[tt, ] <- ellips[index, ]
     
-  
-  # Return here if strssed quantiles are not needed
-  if (is.null(Stressed_Factors)) {
-    return(list(Pred_q = Pred_q, Coeff = coefficients, Pvalues = pvalues, StdError = std_errors))
   }
-  
-  
-  # Predict with stressed factors (if provided)
-  Stressed_Pred_q <- coefficients[1] + coefficients[2] * Y + as.numeric(Stressed_Factors %*% coefficients[3:(2 + r)])
-  
-  # return
-  return(list(Pred_q = Pred_q, Coeff = coefficients, Pvalues = pvalues, 
-              StdError = std_errors, Stressed_Pred_q = Stressed_Pred_q))
-  
+   
+  return(stressed_factors)
+
 }
 
 

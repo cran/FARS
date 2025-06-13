@@ -19,7 +19,7 @@ plot.fars <- function(x, dates = NULL, ...) {
   
   # Prepare data
   quantiles <- x$Quantiles
-  scenario <- x$Scenario_Quantiles
+  scenario <- x$Stressed_Quantiles
   levels <- x$Levels
   
   if (is.null(dates)) {
@@ -52,7 +52,7 @@ plot.fars <- function(x, dates = NULL, ...) {
     
     p_stress <- ggplot(df_s_long, aes(x = Time, y = Value, color = Quantile)) +
       geom_line(size = 1) +
-      labs(title = "Scenario Quantiles",
+      labs(title = "Stressed Quantiles",
            y = "Predicted Value", x = "Time") +
       theme_minimal()
     

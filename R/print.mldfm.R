@@ -12,7 +12,7 @@
 print.mldfm <- function(x, ...) {
   cat("Multilevel Dynamic Factor Model (MLDFM)\n")
   cat("=======================================\n")
-  cat("Number of observations:", nrow(x$Factors), "\n")
+  cat("Time periods:", nrow(x$Factors), "\n")
   cat("Total number of factors:", ncol(x$Factors), "\n")
   cat("Number of nodes:", length(x$Factors_list), "\n\n")
   

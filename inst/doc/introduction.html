@@ -433,7 +433,7 @@ mldfm_result &lt;- mldfm(data,
                       method = 0) </code></pre>
 <pre><code>## Summary of Multilevel Dynamic Factor Model (MLDFM)
 ## ===================================================
-## Number of observations:  59 
+## Time periods:  59 
 ## Total number of factors:  5 
 ## Number of nodes:  5 
 ## Initialization method:  CCA 
@@ -447,7 +447,7 @@ mldfm_result &lt;- mldfm(data,
 ##  - 3 :  1 factor(s)
 ## 
 ## Residual sum of squares (RSS):  15215.6724 
-## Average RSS per observation:  257.8928</code></pre>
+## Average RSS per time period:  257.8928</code></pre>
 <pre class="r"><code># Plot factors
 # plot(mldfm_result, dates = dates) </code></pre>
 </div>
@@ -455,7 +455,7 @@ mldfm_result &lt;- mldfm(data,
 <h1>Subsampling</h1>
 <pre class="r"><code># Subsampling
 n_samples &lt;- 100
-sample_size &lt;- 0.9
+sample_size &lt;- 0.94
 mldfm_subsampling_result &lt;- mldfm_subsampling(data, 
                                          global = global, 
                                          local = local,
@@ -478,10 +478,11 @@ mldfm_subsampling_result &lt;- mldfm_subsampling(data,
 <pre class="r"><code># Create stressed scenario
 scenario &lt;- create_scenario(model = mldfm_result,
                                   subsample = mldfm_subsampling_result,
-                                  data = data, 
-                                  block_ind = block_ind, 
-                                  alpha=0.95)</code></pre>
-<pre><code>## Constructing scenario using 100 subsamples and alpha = 0.95...</code></pre>
+                                  alpha=0.95,
+                                  atcsr=FALSE)</code></pre>
+<pre><code>## Constructing scenario using 100 subsamples and alpha = 0.95</code></pre>
+<pre><code>## Using standard time-varying Gamma</code></pre>
+<pre><code>## ...</code></pre>
 <pre><code>## Scenario construction completed.</code></pre>
 </div>
 <div id="fars-computation" class="section level1">
@@ -492,15 +493,16 @@ fars_result &lt;- compute_fars(dep_variable,
                               scenario = scenario, 
                               h = 1,   
                               edge = 0.05, 
-                              min = TRUE) </code></pre>
-<pre><code>## Running Factor-Augmented Quantile Regressions (FARS)...</code></pre>
+                              min = TRUE,
+                              QTAU = 0.05) </code></pre>
+<pre><code>## Running Factor-Augmented Quantile Regressions (FA-QRs)...</code></pre>
 <pre><code>## Factor-Augmented Quantile Regressions (FARS)
 ## ===========================================
 ## Forecasted quantiles:
 ##  - Time periods:  59 
 ##  - Quantile levels:  0.05 0.25 0.50 0.75 0.95 
 ## 
-## Stressed scenario quantiles: YES</code></pre>
+## Stressed quantiles: YES</code></pre>
 <pre class="r"><code># Plot quantiles
 #plot(fars_result,dates=dates)</code></pre>
 </div>
@@ -525,14 +527,12 @@ density &lt;- density(fars_result$Quantiles,
 <div id="growth-at-risk-gar" class="section level1">
 <h1>Growth-at-Risk (GaR)</h1>
 <pre class="r"><code>#GaR
-GaR0.05 &lt;- quantile_risk(density, QTAU = 0.05)
-GaR0.50 &lt;- quantile_risk(density, QTAU = 0.50)
-GaR0.95 &lt;- quantile_risk(density, QTAU = 0.95)</code></pre>
+GaR &lt;- quantile_risk(density, QTAU = 0.05)</code></pre>
 </div>
 <div id="scenario-density-estimation" class="section level1">
 <h1>Scenario Density Estimation</h1>
 <pre class="r"><code># Scenario Density 
-scenario_density &lt;- density(fars_result$Scenario_Quantiles,  
+scenario_density &lt;- density(fars_result$Stressed_Quantiles,  
                              levels = fars_result$Levels,  
                              est_points = 512, 
                              random_samples = 100000,
@@ -548,10 +548,7 @@ scenario_density &lt;- density(fars_result$Scenario_Quantiles,
 <div id="growth-in-stress-gis" class="section level1">
 <h1>Growth-in-Stress (GiS)</h1>
 <pre class="r"><code>#GiS
-GiS0.05 &lt;- quantile_risk(scenario_density, QTAU = 0.05)
-GiS0.25 &lt;- quantile_risk(scenario_density, QTAU = 0.25)
-GiS0.75 &lt;- quantile_risk(scenario_density, QTAU = 0.75)
-GiS0.95 &lt;- quantile_risk(scenario_density, QTAU = 0.95)</code></pre>
+GiS0 &lt;- quantile_risk(scenario_density, QTAU = 0.05)</code></pre>
 </div>
 
 

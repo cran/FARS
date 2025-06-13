@@ -4,11 +4,9 @@
 \alias{q_reg}
 \title{Quantile Regression with Stressed Scenario Projection}
 \usage{
-q_reg(dep_variable, factors, h = 1, QTAU = 0.05, scenario = NULL, min = TRUE)
+q_reg(dep_variable, factors, Stressed_Factors = NULL, h = 1, QTAU = 0.05)
 }
 \description{
 Estimates quantile regressions of a dependent variable on dynamic factors.
-If a \code{scenario} is provided (e.g., a list of ellipsoids from \code{create_scenario()}),
-the function computes the minimum (or maximum) projected quantile values under stress.
 }
 \keyword{internal}

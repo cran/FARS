@@ -4,18 +4,16 @@
 \alias{create_scenario}
 \title{Create Stressed Scenarios}
 \usage{
-create_scenario(model, subsamples, data, block_ind, alpha = 0.95)
+create_scenario(model, subsamples, alpha = 0.95, atcsr = FALSE)
 }
 \arguments{
 \item{model}{An object of class \code{mldfm}, containing the factor estimates.}
 
 \item{subsamples}{A list of \code{mldfm} objects returned from \code{mldfm_subsampling}.}
 
-\item{data}{A numeric matrix or data frame containing the time series data. Rows represent time points; columns represent observed variables.}
-
-\item{block_ind}{A vector of integers indicating the end index of each block. Must be of length \code{blocks} and in increasing order. Required if \code{blocks > 1}.}
-
 \item{alpha}{Numeric. Confidence level (level of stress) for the hyperellipsoid (e.g., 0.95).}
+
+\item{atcsr}{Logical. If TRUE, uses the Adaptive Threshold Cross-Sectional Robust (AT-CSR) Gamma; otherwise, uses the standard time-varying Gamma.}
 }
 \value{
 A list of matrices representing the hyperellipsoid points for each time observation.
@@ -37,7 +35,7 @@ mldfm_subsampling_result <- mldfm_subsampling(data, blocks = 2,
 block_ind = block_ind, global = global, 
 local = local, n_samples = 100, sample_size = 0.9)
 scenario <- create_scenario(mldfm_result, mldfm_subsampling_result, 
-data, block_ind, alpha = 0.95)
+alpha = 0.95)
 }
 
 }

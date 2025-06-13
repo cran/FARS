@@ -16,10 +16,10 @@ print.fars <- function(x, ...) {
   cat(" - Time periods: ", nrow(x$Quantiles), "\n")
   cat(" - Quantile levels: ", formatC(x$Levels, format = "f", digits = 2), "\n\n")
   
-  if (!is.null(x$Scenario_Quantiles)) {
-    cat("Stressed scenario quantiles: YES\n")
+  if (!is.null(x$Stressed_Quantiles)) {
+    cat("Stressed quantiles: YES\n")
   } else {
-    cat("Stressed scenario quantiles: NO\n")
+    cat("Stressed quantiles: NO\n")
   }
   invisible(x)
 }

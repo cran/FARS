@@ -10,9 +10,8 @@ beta_ols <- function(X, Y) {
 #'
 #' @param model An object of class \code{mldfm}, containing the factor estimates.
 #' @param subsamples A list of \code{mldfm} objects returned from \code{mldfm_subsampling}.
-#' @param data A numeric matrix or data frame containing the time series data. Rows represent time points; columns represent observed variables.
-#' @param block_ind A vector of integers indicating the end index of each block. Must be of length \code{blocks} and in increasing order. Required if \code{blocks > 1}.
 #' @param alpha Numeric. Confidence level (level of stress) for the hyperellipsoid (e.g., 0.95).
+#' @param atcsr Logical. If TRUE, uses the Adaptive Threshold Cross-Sectional Robust (AT-CSR) Gamma; otherwise, uses the standard time-varying Gamma.
 #'
 #' @return A list of matrices representing the hyperellipsoid points for each time observation.
 #' 
@@ -28,14 +27,14 @@ beta_ols <- function(X, Y) {
 #' block_ind = block_ind, global = global, 
 #' local = local, n_samples = 100, sample_size = 0.9)
 #' scenario <- create_scenario(mldfm_result, mldfm_subsampling_result, 
-#' data, block_ind, alpha = 0.95)
+#' alpha = 0.95)
 #' }
 #'
 #' @import ellipse
 #' @import SyScSelection
 #'
 #' @export
-create_scenario <- function(model, subsamples, data, block_ind, alpha=0.95) {
+create_scenario <- function(model, subsamples, alpha=0.95, atcsr = FALSE) {
   
   
   if (!inherits(model, "mldfm")) stop("model must be an object of class 'mldfm'.")
@@ -43,20 +42,15 @@ create_scenario <- function(model, subsamples, data, block_ind, alpha=0.95) {
   if (!all(sapply(subsamples, function(obj) inherits(obj, "mldfm")))) {
     stop("All elements in subsamples must be of class 'mldfm'.")
   }
-  if (!is.matrix(data) && !is.data.frame(data)) stop("data must be a matrix or data frame.")
-  if (is.null(block_ind)) stop("block_ind must be provided when blocks.")
   if (!is.numeric(alpha) || alpha <= 0 || alpha >= 1) {
     stop("alpha must be a numeric value in (0, 1).")
   }
   
-  data <- scale(data,TRUE,TRUE)
-  
+
   # Extract model factors
   Factors <- model$Factors
   Loadings <- model$Lambda
-  #Loadings <-t((1/nrow(Factors))*t(Factors)%*%data)
   Residuals <- model$Residuals
-  #Residuals<-data-Factors%*%t(Loadings)
   Factors_list <- model$Factors_list
   
  
@@ -71,31 +65,26 @@ create_scenario <- function(model, subsamples, data, block_ind, alpha=0.95) {
   n_var_sample <- nrow(subsamples[[1]]$Lambda)
   
   
-  # Define block ranges and count the number of variables in each range
-  ranges <- list()
-  num_vars <- numeric(length(block_ind))  
-  
-  
-  for (i in 1:length(block_ind)) {
-    if (i == 1) {
-      ranges[[i]] <- 1:block_ind[i]
-    } else {
-      ranges[[i]] <- (block_ind[i - 1] + 1):block_ind[i]
-    }
-    
-    num_vars[i] <- length(ranges[[i]]) 
-  }
-  
-  
   message(paste0("Constructing scenario using ", length(subsamples), 
-                 " subsamples and alpha = ", alpha, "..."))
+                 " subsamples and alpha = ", alpha))
+  message("Using ", ifelse(atcsr, "AT-CSR Gamma", "standard time-varying Gamma"))
+  message("... ")
   
   
   # Set ellipsoid center for each obs
   CenterHE_matrix <- Factors
   
+  # Compute the inverse of the loading matrix
+  inv_Loads <- solve((t(Loadings) %*% Loadings) / n_var)
+  
   # Initialize sigma 
   Sigma_list <- list()
+  
+  # Compute atcsr Gamma
+  if(atcsr){
+    Gamma <- compute_gamma_atcsr(Residuals, Loadings)
+  }
+ 
   
   for (obs in 1:n_obs) {
     
@@ -105,19 +94,18 @@ create_scenario <- function(model, subsamples, data, block_ind, alpha=0.95) {
     Sigma <- matrix(0, nrow = tot_n_factors, ncol = tot_n_factors)
     
     
-    # Compute Gamma
-    Gamma <- matrix(0, nrow = ncol(Factors), ncol = ncol(Factors))
-    for(v in 1:n_var){
-      term <- (Loadings[v,] %*% t(Loadings[v,]))*(Residuals[obs,v]^2)
+    # Compute normal gamma Gamma
+    if(!atcsr){
+      Gamma <- matrix(0, nrow = ncol(Factors), ncol = ncol(Factors))
+      for(v in 1:n_var){
+        term <- (Loadings[v,] %*% t(Loadings[v,]))*(Residuals[obs,v]^2)
+        
+        Gamma <- Gamma + term
+      }
       
-      Gamma <- Gamma + term
+      Gamma <- Gamma / n_var
     }
-    
-    Gamma <- Gamma / n_var
-    
-    
-    # Compute the inverse of the loading matrix
-    inv_Loads <- solve((t(Loadings) %*% Loadings) / n_var)
+   
       
     # Compute Sigma
     term2 <- matrix(0, nrow = ncol(Factors), ncol = ncol(Factors))
