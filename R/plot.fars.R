@@ -26,6 +26,16 @@ plot.fars <- function(x, dates = NULL, ...) {
     dates <- 1:nrow(quantiles)
   }
   
+  
+  # Compute global min and max
+  y_min <- min(quantiles, na.rm = TRUE)
+  y_max <- max(quantiles, na.rm = TRUE)
+  if (!is.null(scenario)) {
+    y_min <- min(y_min, min(scenario, na.rm = TRUE))
+    y_max <- max(y_max, max(scenario, na.rm = TRUE))
+  }
+  y_range <- c(y_min, y_max)
+  
   # --- Forecasted Quantiles ---
   df <- as.data.frame(quantiles)
   colnames(df) <- paste0("Q", levels)
@@ -39,6 +49,7 @@ plot.fars <- function(x, dates = NULL, ...) {
     geom_line(size = 1) +
     labs(title = "Quantiles",
          y = "Predicted Value", x = "Time") +
+    scale_y_continuous(limits = y_range) +
     theme_minimal()
   
   print(p_main)
@@ -54,6 +65,7 @@ plot.fars <- function(x, dates = NULL, ...) {
       geom_line(size = 1) +
       labs(title = "Stressed Quantiles",
            y = "Predicted Value", x = "Time") +
+      scale_y_continuous(limits = y_range) +
       theme_minimal()
     
     print(p_stress)

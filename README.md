@@ -15,7 +15,7 @@ The `FARS` package provides a comprehensive framework in R for modeling and fore
 - (v) Estimate the density when the factors are stressed.
 
 # Installation and Usage
-For  detailed usage and examples, including stress testing, quantile regression, and more, please refer to the [FARS Vignette](./vignettes/introduction.Rmd).
+For  detailed usage and examples, including stress testing, quantile regression, and more, please refer to the [FARS Vignette](./vignettes/pdf/Factor_Augmented_Regression_Scenarios_in_R.pdf).
 The Vignette example is based on: 
 González-Rivera, G., Rodríguez-Caballero, C. V., & Ruiz, E. (2024). Expecting the unexpected: Stressed scenarios for economic growth. Journal of Applied Econometrics, 39(5), 926–942. https://doi.org/10.1002/jae.3060
 

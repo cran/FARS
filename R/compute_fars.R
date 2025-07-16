@@ -62,6 +62,8 @@ compute_fars <- function(dep_variable,
   levels[1] <- levels[1]+edge # adjust left edge
   levels[5] <- levels[5]-edge # adjust right edge
   
+ 
+  
   # Output structures
   Quantiles <- matrix(nrow = length(dep_variable), ncol = length(levels))
   Stressed_Quantiles <- if (!is.null(scenario)) matrix(nrow = length(dep_variable), ncol = length(levels)) else NULL
@@ -103,8 +105,10 @@ compute_fars <- function(dep_variable,
   quantile_levels <- levels  # store adjusted quantiles (with edge)
   
   
+ 
+  
   result <- list(
-    Quantiles = matrix(Quantiles,ncol = ncol(factors)),
+    Quantiles = matrix(Quantiles,ncol = length(levels)),
     Coeff = coeff_df,
     StdError = stderr_df,
     Pvalue = pvalue_df,
@@ -114,12 +118,13 @@ compute_fars <- function(dep_variable,
   if (!is.null(scenario)) {
     result$QTAU <- QTAU
     result$Stressed_Factors <- matrix(Stressed_Factors, ncol = ncol(factors))
-    result$Stressed_Quantiles <- matrix(Stressed_Quantiles, ncol = ncol(factors))
+    result$Stressed_Quantiles <- matrix(Stressed_Quantiles, ncol = length(levels))
     
   }
   
   class(result) <- "fars"
-  print(result)
+  message("Completed")
+  
   return(result)
 
 }

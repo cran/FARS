@@ -13,7 +13,7 @@ print.fars <- function(x, ...) {
   cat("Factor-Augmented Quantile Regressions (FARS)\n")
   cat("===========================================\n")
   cat("Forecasted quantiles:\n")
-  cat(" - Time periods: ", nrow(x$Quantiles), "\n")
+  cat(" - Number of periods: ", nrow(x$Quantiles), "\n")
   cat(" - Quantile levels: ", formatC(x$Levels, format = "f", digits = 2), "\n\n")
   
   if (!is.null(x$Stressed_Quantiles)) {

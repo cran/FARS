@@ -4,7 +4,7 @@
 \alias{create_scenario}
 \title{Create Stressed Scenarios}
 \usage{
-create_scenario(model, subsamples, alpha = 0.95, atcsr = FALSE)
+create_scenario(model, subsamples, alpha = 0.95, fpr = FALSE)
 }
 \arguments{
 \item{model}{An object of class \code{mldfm}, containing the factor estimates.}
@@ -13,7 +13,7 @@ create_scenario(model, subsamples, alpha = 0.95, atcsr = FALSE)
 
 \item{alpha}{Numeric. Confidence level (level of stress) for the hyperellipsoid (e.g., 0.95).}
 
-\item{atcsr}{Logical. If TRUE, uses the Adaptive Threshold Cross-Sectional Robust (AT-CSR) Gamma; otherwise, uses the standard time-varying Gamma.}
+\item{fpr}{Logical. If TRUE, uses the Adaptive Threshold Cross-Sectional Robust (FPR) Gamma as in Fresoli, Poncela and Ruiz (2024); otherwise, uses the standard time-varying (NG) Gamma.}
 }
 \value{
 A list of matrices representing the hyperellipsoid points for each time observation.

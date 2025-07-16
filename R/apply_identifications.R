@@ -48,7 +48,7 @@ apply_identifications <- function(Yorig, num_blocks, ranges, r_list,
   counter <- counter + r_list[[global_key]]
   
   # Check identifications
-  # print(key)
+  # print(global_key)
   # check_identification_condition_1(GlobalFactors_new)
   # check_identification_condition_2(t(GlobalLoadings_new))
   

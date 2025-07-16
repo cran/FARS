@@ -15,7 +15,8 @@ print.fars_density <- function(x, ...) {
   cat("Time observations  :", nrow(x$density), "\n")
   cat("Estimation points  :", ncol(x$density), "\n")
   cat("Random samples     :", ncol(x$distribution), "\n")
-  cat("Range of x values  : [", min(x$x_vals), ",", max(x$x_vals), "]\n")
+  cat("Support range      : [", min(x$x_vals), ",", max(x$x_vals), "]\n")
+  cat("Optimization       :", x$optimization,"\n")
   invisible(x)
 }
 

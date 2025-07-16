@@ -11,7 +11,7 @@ beta_ols <- function(X, Y) {
 #' @param model An object of class \code{mldfm}, containing the factor estimates.
 #' @param subsamples A list of \code{mldfm} objects returned from \code{mldfm_subsampling}.
 #' @param alpha Numeric. Confidence level (level of stress) for the hyperellipsoid (e.g., 0.95).
-#' @param atcsr Logical. If TRUE, uses the Adaptive Threshold Cross-Sectional Robust (AT-CSR) Gamma; otherwise, uses the standard time-varying Gamma.
+#' @param fpr Logical. If TRUE, uses the Adaptive Threshold Cross-Sectional Robust (FPR) Gamma as in Fresoli, Poncela and Ruiz (2024); otherwise, uses the standard time-varying (NG) Gamma.
 #'
 #' @return A list of matrices representing the hyperellipsoid points for each time observation.
 #' 
@@ -32,9 +32,10 @@ beta_ols <- function(X, Y) {
 #'
 #' @import ellipse
 #' @import SyScSelection
+#' @importFrom stats qnorm 
 #'
 #' @export
-create_scenario <- function(model, subsamples, alpha=0.95, atcsr = FALSE) {
+create_scenario <- function(model, subsamples, alpha=0.95, fpr = FALSE) {
   
   
   if (!inherits(model, "mldfm")) stop("model must be an object of class 'mldfm'.")
@@ -67,7 +68,7 @@ create_scenario <- function(model, subsamples, alpha=0.95, atcsr = FALSE) {
   
   message(paste0("Constructing scenario using ", length(subsamples), 
                  " subsamples and alpha = ", alpha))
-  message("Using ", ifelse(atcsr, "AT-CSR Gamma", "standard time-varying Gamma"))
+  message("Using ", ifelse(fpr, "FPR Gamma", "standard time-varying Gamma"))
   message("... ")
   
   
@@ -80,9 +81,9 @@ create_scenario <- function(model, subsamples, alpha=0.95, atcsr = FALSE) {
   # Initialize sigma 
   Sigma_list <- list()
   
-  # Compute atcsr Gamma
-  if(atcsr){
-    Gamma <- compute_gamma_atcsr(Residuals, Loadings)
+  # Compute FPR Gamma
+  if(fpr){
+    Gamma <- compute_gamma_FPR(Residuals, Loadings)
   }
  
   
@@ -95,7 +96,7 @@ create_scenario <- function(model, subsamples, alpha=0.95, atcsr = FALSE) {
     
     
     # Compute normal gamma Gamma
-    if(!atcsr){
+    if(!fpr){
       Gamma <- matrix(0, nrow = ncol(Factors), ncol = ncol(Factors))
       for(v in 1:n_var){
         term <- (Loadings[v,] %*% t(Loadings[v,]))*(Residuals[obs,v]^2)
@@ -154,14 +155,32 @@ create_scenario <- function(model, subsamples, alpha=0.95, atcsr = FALSE) {
     
     calpha <- sizeparam_normal_distn(alpha, d=tot_n_factors)  # Size parameter 
 
-    if(tot_n_factors > 2){
-      # more than 2 dimensions
+    # if(tot_n_factors > 2){
+    #   # more than 2 dimensions
+    #   hellip <- hyperellipsoid(center_obs, solve(sigma_obs), calpha)
+    #   Hyperellipsoids[[obs]] <- t(hypercube_mesh(8,hellip,TRUE))
+    # }else{
+    #   # 2D ellips
+    #   Hyperellipsoids[[obs]] <- ellipse(sigma_obs, centre=center_obs, level = alpha, npoints = 300)
+    # }
+    
+    if (tot_n_factors > 2) {
+      # More than 2 dimensions
       hellip <- hyperellipsoid(center_obs, solve(sigma_obs), calpha)
-      Hyperellipsoids[[obs]] <- t(hypercube_mesh(8,hellip,TRUE))
-    }else{
-      # 2D ellips
-      Hyperellipsoids[[obs]] <- ellipse(sigma_obs, centre=center_obs, level = alpha, npoints = 300)
+      Hyperellipsoids[[obs]] <- t(hypercube_mesh(8, hellip, TRUE))
+    } else if (tot_n_factors == 2) {
+      # 2D ellipse
+      Hyperellipsoids[[obs]] <- ellipse(sigma_obs, centre = center_obs, level = alpha, npoints = 300)
+    } else if (tot_n_factors == 1) {
+      # 1D confidence interval
+      se <- sqrt(sigma_obs[1, 1])  
+      z_alpha <- qnorm((1 + alpha) / 2)  
+      lower <- center_obs - z_alpha * se
+      upper <- center_obs + z_alpha * se
+      Hyperellipsoids[[obs]] <- matrix(c(lower, upper), ncol = 1)  # 2row matrix: lower and upper 
     }
+    
+    
     
   }
   message("Scenario construction completed.")

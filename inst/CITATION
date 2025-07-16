@@ -1,0 +1,14 @@
+bibentry(
+  bibtype = "Article",
+  title = "FARS: Factor Augmented Regression Scenarios in R",
+  author = c(
+    person("Gian Pietro", "Bellocca"),
+    person("Ignacio", "Garrón"),
+    person("Vladimir", "Rodríguez-Caballero"),
+    person("Esther", "Ruiz")
+  ),
+  journal = "arXiv preprint",
+  year = "2025",
+  note = "arXiv:2507.10679",
+  url = "https://arxiv.org/abs/2507.10679"
+)

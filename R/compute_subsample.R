@@ -3,6 +3,11 @@
 #' @keywords internal
 compute_subsample <- function(data, block_ind, n,sample_size = 1, seed = NULL) {
   
+  # Block index in case there is just one block
+  if (is.null(block_ind)) {
+    block_ind <- ncol(data)
+  }
+  
   # Set seed once to ensure reproducibility
   if (!is.null(seed)) {
     set.seed(seed)

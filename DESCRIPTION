@@ -1,7 +1,7 @@
 Package: FARS
 Type: Package
 Title: Factor-Augmented Regression Scenarios
-Version: 0.4.0
+Version: 0.5.0
 Authors@R: c(person("Gian Pietro", "Bellocca", email = "gbellocc@est-econ.uc3m.es", role = c("aut", "cre")),
              person("Ignacio", "Garrón", role = c("aut")),
              person("Vladimir", "Rodríguez-Caballero", role = c("aut")),
@@ -11,16 +11,17 @@ Description: Provides a comprehensive framework in R for modeling and forecastin
 Depends: R (>= 3.5.0)
 Imports: ggplot2, plotly, sn, nloptr, ellipse, SyScSelection, quantreg,
         tidyr, dplyr, forcats, MASS, reshape2, stringr,
-Suggests: devtools, knitr, rmarkdown, openxlsx, readxl, zoo
+Suggests: devtools, knitr, rmarkdown, markdown, openxlsx, readxl, zoo
 VignetteBuilder: knitr
 License: GPL (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.3.2
+URL: https://arxiv.org/abs/2507.10679
 NeedsCompilation: no
-Packaged: 2025-06-13 07:28:10 UTC; gianpietro
+Packaged: 2025-07-16 08:39:31 UTC; gianpietro
 Author: Gian Pietro Bellocca [aut, cre],
   Ignacio Garrón [aut],
   Vladimir Rodríguez-Caballero [aut],
   Esther Ruiz [aut]
 Repository: CRAN
-Date/Publication: 2025-06-13 08:20:02 UTC
+Date/Publication: 2025-07-16 08:50:06 UTC

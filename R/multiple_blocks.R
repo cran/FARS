@@ -95,7 +95,6 @@ multiple_blocks<-function(Yorig, global, local, middle_layer, block_ind, tol, ma
   }
   
   
-  
   # --- STEP 3: IDENTIFICATION ---
   Id_res <- apply_identifications(
     Yorig, num_blocks, ranges, r_list,

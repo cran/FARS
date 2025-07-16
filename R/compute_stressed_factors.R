@@ -51,6 +51,7 @@ compute_stressed_factors <- function(dep_variable, factors, scenario, h, QTAU, m
     
   }
    
+  
   return(stressed_factors)
 
 }

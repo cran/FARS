@@ -1,9 +1,10 @@
-#' Compute Adaptive Threshold Cross-Sectional Robust Gamma (AT-CSR)
+#' Compute Adaptive Threshold Cross-Sectional Robust Gamma (AT-CSR) 
+#' Fresoli, Poncela and Ruiz (2024)
 #'
 #'
 #' @keywords internal
 #' 
-compute_gamma_atcsr <- function(Residuals, Loadings) {
+compute_gamma_FPR <- function(Residuals, Loadings) {
   
   
   T <- nrow(Residuals)

@@ -37,7 +37,9 @@ mldfm_subsampling <- function(data, blocks = 1, block_ind = NULL, global = 1,
   # Argument checks
   if (!is.matrix(data) && !is.data.frame(data)) stop("data must be a matrix or data frame.")
   if (!is.numeric(blocks) || length(blocks) != 1) stop("blocks must be a single numeric value.")
-  if (is.null(block_ind) || length(block_ind) != blocks) stop("block_ind must be provided and must have length equal to the number of blocks.")
+  if (blocks > 1 && (is.null(block_ind) || length(block_ind) != blocks)) {
+    stop("block_ind must be provided and must have length equal to the number of blocks (when blocks > 1).")
+  }
   if (!is.numeric(global) || length(global) != 1 || global < 1) stop("global must be a single numeric value greater than zero")
   if (!is.null(local)) {
     if (!is.numeric(local) || length(local) != blocks) {

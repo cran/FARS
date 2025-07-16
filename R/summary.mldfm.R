@@ -13,8 +13,8 @@ summary.mldfm <- function(object, ...) {
   cat("Summary of Multilevel Dynamic Factor Model (MLDFM)\n")
   cat("===================================================\n")
   
-  cat("Time periods: ", nrow(object$Factors), "\n")
-  cat("Total number of factors: ", ncol(object$Factors), "\n")
+  cat("Number of periods: ", nrow(object$Factors), "\n")
+  cat("Number of factors: ", ncol(object$Factors), "\n")
   cat("Number of nodes: ", length(object$Factors_list), "\n")
   
   if (!is.null(object$Method)) {
@@ -25,7 +25,7 @@ summary.mldfm <- function(object, ...) {
     cat("Number of iterations to converge: ", object$Iterations, "\n")
   }
   
-  cat("\nFactors per node:\n")
+  cat("\nNumber of factors per node:\n")
   for (key in names(object$Factors_list)) {
     cat(" -", key, ": ", object$Factors_list[[key]], "factor(s)\n")
   }
@@ -34,7 +34,7 @@ summary.mldfm <- function(object, ...) {
     rss <- sum(object$Residuals^2)
     avg_rss <- mean(rowSums(object$Residuals^2))
     cat("\nResidual sum of squares (RSS): ", formatC(rss, format = "f", digits = 4), "\n")
-    cat("Average RSS per time period: ", formatC(avg_rss, format = "f", digits = 4), "\n")
+    cat("Average RSS per period: ", formatC(avg_rss, format = "f", digits = 4), "\n")
   }
   
   invisible(object)
