@@ -2,11 +2,27 @@
 % Please edit documentation in R/single_block.R
 \name{single_block}
 \alias{single_block}
-\title{Multi-Level Dynamic Factor Model - Single block}
+\title{Multi-Level Dynamic Factor Model  - Single Block (DFM)}
 \usage{
 single_block(data, r)
 }
+\arguments{
+\item{data}{A numeric matrix or data frame containing the time series data (T × N).}
+
+\item{r}{Integer. Number of factors to extract.}
+}
+\value{
+A list with elements:
+\describe{
+\item{factors}{Matrix of estimated factors.}
+\item{loadings}{Matrix of factor loadings.}
+\item{residuals}{Matrix of residuals.}
+\item{method}{Method used for factor extraction ("PCA").}
+\item{iterations}{Number of iterations before convergence (always 0 for single block).}
+\item{factors_list}{List of estimated factors for each node.}
+}
+}
 \description{
-Multi-Level Dynamic Factor Model - Single block
+Estimates a Dynamic Factor Model (DFM) when only one block is present, using Principal Component Analysis (PCA).
 }
 \keyword{internal}

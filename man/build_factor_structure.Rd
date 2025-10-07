@@ -2,7 +2,7 @@
 % Please edit documentation in R/build_factor_structure.R
 \name{build_factor_structure}
 \alias{build_factor_structure}
-\title{Create the key value pair system to track the factors}
+\title{Build Factor Structure for Multi-level Dynamic Factor Model}
 \usage{
 build_factor_structure(
   global = 1,
@@ -11,7 +11,20 @@ build_factor_structure(
   num_blocks = NULL
 )
 }
+\arguments{
+\item{global}{Integer. Number of global factors extracted from the entire dataset.}
+
+\item{local}{Integer vector of length \code{blocks}. Specifies the number of local factors for each block.}
+
+\item{middle_layer}{Named list. Each name is a string specifying a group of blocks (e.g., \code{"1-3"} or \code{"2-3"}), and each value is the number of factors to extract.}
+
+\item{num_blocks}{Integer. Number of blocks into which the data is divided.}
+}
+\value{
+A named list where each name corresponds to a block or group of blocks (e.g., "1", "1-3"),
+and the value is the number of factors associated with that node.
+}
 \description{
-Create the key value pair system to track the factors
+Constructs a named list defining the factor structure across global, middle-layer, and local levels,
 }
 \keyword{internal}

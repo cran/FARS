@@ -45,15 +45,22 @@ mldfm_subsampling(
 \item{seed}{Optional integer. Seed for reproducibility of the subsampling process. If \code{NULL}, random draws will differ each run.}
 }
 \value{
-A list of \code{mldfm} objects, one for each subsample.
+An object of class \code{mldfm_subsample}, which is a list containing:
+\itemize{
+\item \code{models}: A list of \code{mldfm} objects, one for each subsample.
+\item \code{n_samples}: Number of subsamples generated.
+\item \code{sample_size}: Proportion of the sample used for each subsample.
+\item \code{seed}: Seed used for random sampling (if any).
+\item \code{call}: Function call.
+}
 }
 \description{
-Repeatedly applies the MLDFM estimation to randomly drawn subsamples of the input data.
+Applies the MLDFM estimation to randomly drawn subsamples of the input data.
 }
 \examples{
 \donttest{
 data <- matrix(rnorm(1000), nrow = 100, ncol = 100)
-block_ind <- c(50,100)  # Defines 3 blocks
+block_ind <- c(50,100)  
 local <- c(1, 1)   
 result <- mldfm_subsampling(data, blocks = 2, block_ind = block_ind, global = 1, 
 local = local, n_samples = 100, sample_size = 0.9)

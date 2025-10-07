@@ -2,10 +2,10 @@
 % Please edit documentation in R/compute_initial_factors.R
 \name{compute_initial_factors}
 \alias{compute_initial_factors}
-\title{Compute Initial Factors (Multilevel Dynamic Factor Model)}
+\title{Compute Initial Factors for Multi-Level Dynamic Factor Model}
 \usage{
 compute_initial_factors(
-  Yorig,
+  data,
   num_vars,
   num_obs,
   num_blocks,
@@ -14,7 +14,29 @@ compute_initial_factors(
   method
 )
 }
+\arguments{
+\item{data}{A numeric matrix or data frame containing the time series data (T × N).}
+
+\item{num_vars}{Integer vector. Number of variables in each block.}
+
+\item{num_obs}{Integer. Number of time observations (T).}
+
+\item{num_blocks}{Integer. Number of blocks.}
+
+\item{ranges}{A list of vectors with the column indices for each block.}
+
+\item{r_list}{A named list specifying the number of factors to extract for each node (from \code{build_factor_structure}).}
+
+\item{method}{Integer. Method for factor extraction: \code{0} = Canonical Correlation Analysis (CCA), \code{1} = Principal Component Analysis (PCA).}
+}
+\value{
+A list with two elements:
+\describe{
+\item{initial_factors}{Matrix of all initial factors (T × total number of factors).}
+\item{factor_list}{Named list of factors for each node in the hierarchy.}
+}
+}
 \description{
-Compute Initial Factors (Multilevel Dynamic Factor Model)
+Computes the initial set of global, middle-layer, and local factors using either PCA or CCA.
 }
 \keyword{internal}

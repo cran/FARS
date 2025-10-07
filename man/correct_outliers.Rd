@@ -2,7 +2,7 @@
 % Please edit documentation in R/correct_outliers.R
 \name{correct_outliers}
 \alias{correct_outliers}
-\title{Correct Outliers in a Dataset}
+\title{Correct Dataset Outliers}
 \usage{
 correct_outliers(data, r)
 }

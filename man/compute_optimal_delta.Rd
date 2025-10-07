@@ -2,12 +2,14 @@
 % Please edit documentation in R/compute_optimal_delta.R
 \name{compute_optimal_delta}
 \alias{compute_optimal_delta}
-\title{Compute Optimal Delta for AT-CSR Thresholding (base-10 log version)}
+\title{Compute Optimal Delta for FPR Gamma Computation}
 \usage{
 compute_optimal_delta(Sigma_eps, Theta, T)
 }
+\value{
+A single numeric value representing the optimal threshold level \code{delta}.
+}
 \description{
-Computes the optimal threshold level delta following Qiu and Liyanage (2019),
-assuming all logs are base-10 as per the original paper.
+Computes the optimal threshold level delta.
 }
 \keyword{internal}

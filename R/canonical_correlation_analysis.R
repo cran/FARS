@@ -1,14 +1,15 @@
-#' Canonical Correlation Analysis (for MLDFM)
+#' @title Canonical Correlation Analysis for MLDFM
 #'
-#' Computes factors using CCA across blocks, based on local PCA-extracted factors.
+#' @description Performs Canonical Correlation Analysis (CCA) 
+#'
+#' @param y A numeric matrix containing all variables (T × N).
+#' @param Nregio Integer vector specifying the number of variables in each block.
+#' @param r_glob Integer. Number of global factors to be extracted.
+#' @param r_reg Integer vector. Number of regional (local) factors to be extracted for each block.
+#'
+#' @return A numeric matrix of estimated factors (T × \code{r_glob}).
 #'
 #' @keywords internal
-#' 
-#' y: matrix containing all variables 
-#' Nregio: vector containing the number of variables in each node
-#' r_global: number of global factor to be extracted (final output)
-#' r_reg: vector which specify the number of regional factors to be extracted in each node
-#' 
 canonical_correlation_analysis <- function(y, Nregio,r_glob,r_reg){
   
   

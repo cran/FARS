@@ -5,16 +5,39 @@
 \title{Apply Identification Constraints to Factors and Loadings}
 \usage{
 apply_identifications(
-  Yorig,
+  data,
   num_blocks,
   ranges,
   r_list,
-  currentFactors,
-  Factor_list,
-  Loadings_list
+  current_factors,
+  factor_list,
+  loadings_list
 )
 }
+\arguments{
+\item{data}{A numeric matrix or data frame containing the observed time series (T × N).}
+
+\item{num_blocks}{Integer. The number of blocks.}
+
+\item{ranges}{A list of vectors with the column indices corresponding to each block.}
+
+\item{r_list}{A named list specifying the number of factors for each node (from \code{build_factor_structure}).}
+
+\item{current_factors}{A numeric matrix with the current estimate of all factors (T × total factors).}
+
+\item{factor_list}{A named list of factors per node (from \code{compute_initial_factors}).}
+
+\item{loadings_list}{A named list of loadings per node.}
+}
+\value{
+A list containing:
+\describe{
+\item{factor_list}{An updated named list of identified factors.}
+\item{final_factors}{A matrix containing identified factors.}
+\item{loadings}{A matrix of identified factor loadings.}
+}
+}
 \description{
-Apply Identification Constraints to Factors and Loadings
+Applies identification constraints to factors and loadings.
 }
 \keyword{internal}

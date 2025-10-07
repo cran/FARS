@@ -1,5 +1,19 @@
-#' Internal helper to compute a column-wise subsample of the data by block
+#' @title Compute Subsample of Data by Block
+#' 
+#' @description Selects a random subset of columns within each block of the input data matrix.
+#' 
+#' @param data A numeric matrix or data frame containing the original data. 
+#' @param block_ind Integer vector specifying the end indices of each block. If \code{NULL}, assumes a single block spanning all columns.
+#' @param n Integer specifying the number of blocks.
+#' @param sample_size Numeric between 0 and 1 specifying the proportion of columns to sample within each block. Defaults to 1 (all columns).
+#' @param seed Optional integer. Seed for reproducibility of the column sampling. If \code{NULL}, sampling is random.
 #'
+#'@return A list with two elements:
+#' \describe{
+#'   \item{sample_data}{A numeric matrix combining the sampled columns from all blocks.}
+#'   \item{sample_block_ind}{An integer vector containing the indices corresponding to the sampled data.}
+#' }
+#' 
 #' @keywords internal
 compute_subsample <- function(data, block_ind, n,sample_size = 1, seed = NULL) {
   

@@ -1,8 +1,0 @@
-\documentclass{article}
-\usepackage{pdfpages}
-%\VignetteIndexEntry{Factor Augmented Regression Scenarios in R}
-%\VignetteEngine{knitr::knitr}
-%\VignetteEncoding{UTF-8}
-\begin{document}
-\includepdf[pages=-, fitpaper=true]{pdf/Factor_Augmented_Regression_Scenarios_in_R.pdf}
-\end{document}

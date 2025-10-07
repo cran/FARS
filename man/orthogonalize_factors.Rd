@@ -2,11 +2,11 @@
 % Please edit documentation in R/orthogonalize_factors.R
 \name{orthogonalize_factors}
 \alias{orthogonalize_factors}
-\title{Orthogonalize factors}
+\title{Orthogonalize Factors}
 \usage{
 orthogonalize_factors(X)
 }
 \description{
-Orthogonalize factors
+Orthogonalize Factors
 }
 \keyword{internal}

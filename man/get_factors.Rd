@@ -2,11 +2,18 @@
 % Please edit documentation in R/get_factors.R
 \name{get_factors}
 \alias{get_factors}
-\title{Extract Factors at a Given Hierarchical Level}
+\title{Generic Function to Extract Estimated Factors}
 \usage{
-get_factors(Factor_list, combination, level)
+get_factors(x, ...)
+}
+\arguments{
+\item{x}{An object from which to extract the estimated factors.}
+
+\item{...}{Additional arguments.}
+}
+\value{
+A matrix of estimated factors.
 }
 \description{
-Extract Factors at a Given Hierarchical Level
+Generic Function to Extract Estimated Factors
 }
-\keyword{internal}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/compute_density.R
 \name{compute_density}
 \alias{compute_density}
-\title{Compute Skew-t Densities from Forecasted Quantiles}
+\title{Compute Skew-t Densities from Quantiles}
 \usage{
 compute_density(
   quantiles,
@@ -15,37 +15,36 @@ compute_density(
 )
 }
 \arguments{
-\item{quantiles}{A matrix of forecasted quantiles. Each row is a time observation; each column a quantile level.}
+\item{quantiles}{A matrix of quantiles. Each row represents a time observation, and each column corresponds to a quantile level.}
 
 \item{levels}{A numeric vector of the quantile levels corresponding to the columns of the quantile matrix (default: c(0.05, 0.25, 0.50, 0.75, 0.95)).}
 
-\item{est_points}{Integer. Number of evaluation points for the estimated density (default: 512).}
+\item{est_points}{Integer. The number of evaluation points for the estimated density (default: 512).}
 
-\item{random_samples}{Integer. Number of random samples to draw from the fitted skew-t distribution (default: 5000).}
+\item{random_samples}{Integer. The number of random samples to draw from the fitted skew-t distribution (default: 5000).}
 
-\item{support}{Numeric vector of length 2. Defines the lower and upper limits of the density evaluation range. Used with \code{est_points} to create the evaluation grid. Default: \code{c(-30, 10)}.}
+\item{support}{Numeric vector of length 2. Defines the lower and upper limits of the density evaluation range. Used with \code{est_points} to create the evaluation grid. Default: \code{c(-10, 10)}.}
 
-\item{nl}{Logical. If \code{TRUE}, uses nonlinear optimization via \code{nloptr}; if \code{FALSE}, uses linear optimization via \code{optim}. Default: \code{FALSE}.}
+\item{nl}{Logical. If \code{TRUE}, uses nonlinear optimization via \code{nloptr}; if \code{FALSE} (Default), uses linear optimization via \code{optim}.}
 
-\item{seed}{Optional integer to set the random seed for reproducibility (default: NULL).}
+\item{seed}{Optional integer to set the random seed for reproducibility.}
 }
 \value{
-An object of class \code{"fars_density"}, which is a list containing the following components:
+An object of class \code{"fars_density"}, which is a list containing:
 \describe{
 \item{density}{A matrix of estimated densities for each time period (rows) across estimation points (columns).}
 \item{distribution}{A matrix of random draws from the fitted skew-t distribution for each time period.}
-\item{optimization}{The optimization method implemented.}
-\item{x_vals}{The sequence of evaluation points used to compute the density. Useful for plotting.}
+\item{optimization}{The optimization method used (either 'nloptr' or 'optim').}
+\item{eval_points}{The sequence of evaluation points used to compute the density. Useful for plotting.}
 }
 }
 \description{
-Compute Skew-t Densities from Forecasted Quantiles
+Computes the skew-t density from a matrix of quantiles. It allows for both linear and nonlinear optimization methods.
 }
 \examples{
 \donttest{
-
-Quantiles <- matrix(rnorm(500, mean = 0, sd = 1), nrow = 100, ncol = 5)
-density_result <- compute_density(Quantiles, seed = 42)
+quantiles <- matrix(rnorm(500, mean = 0, sd = 1), nrow = 100, ncol = 5)
+density_result <- compute_density(quantiles, seed = 42)
 }
 
 }

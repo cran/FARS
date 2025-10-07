@@ -1,13 +1,28 @@
-#' Quantile Regression with Stressed Scenario Projection
+#' @title Quantile Regression 
 #'
-#' Estimates quantile regressions of a dependent variable on dynamic factors.
+#' @description Estimates quantile regressions of a dependent variable on dynamic factors.
+#' Optionally computes projections under stressed scenarios using the provided stressed factors.
+#'
+#' @param dep_variable A numeric vector representing the dependent variable (e.g., GDP growth, inflation).
+#' @param factors A matrix of factor estimates from an MLDFM model, with rows corresponding to time periods and columns corresponding to factors.
+#' @param stressed_factors An optional matrix of stressed factors. If provided, the function computes projections under the stressed scenario.
+#' @param h Integer representing the forecast horizon (in time steps) for the quantile regression.
+#' @param qtau Numeric. The quantile level used in quantile regression.
+#'
+#' @return A list containing:
+#' \describe{
+#'   \item{\code{pred_q}}{The quantile regression predictions based on the estimated factors.}
+#'   \item{\code{coeff}}{The regression coefficients for each variable in the model.}
+#'   \item{\code{pvalues}}{The p-values for each regression coefficient.}
+#'   \item{\code{stderr}}{The standard errors for each regression coefficient.}
+#'   \item{\code{stressed_pred_q}}{The quantile predictions under the stressed scenario, only if \code{stressed_factors} is provided.}
+#' }
 #'
 #' @import quantreg
 #' @importFrom stats as.formula
 #' 
 #' @keywords internal
-#' 
-q_reg <- function(dep_variable, factors, Stressed_Factors = NULL,  h=1,  QTAU=0.05) {
+q_reg <- function(dep_variable, factors, stressed_factors = NULL,  h=1,  qtau=0.05) {
   
   
   t <- nrow(factors)
@@ -35,7 +50,7 @@ q_reg <- function(dep_variable, factors, Stressed_Factors = NULL,  h=1,  QTAU=0.
   formula <- as.formula(paste("Y ~ LagY", factor_names_concat, sep = " + "))
 
   # qreg
-  fit_q <- rq(formula, tau = QTAU, data = reg_data)
+  fit_q <- rq(formula, tau = qtau, data = reg_data)
   summary_fit <- summary(fit_q, se = "ker",covariance=TRUE)
   coefficients <- summary_fit$coefficients[, 1]
   pvalues <- summary_fit$coefficients[, 4] 
@@ -44,21 +59,21 @@ q_reg <- function(dep_variable, factors, Stressed_Factors = NULL,  h=1,  QTAU=0.
   
  
   # Predict quantile with estimated factors
-  Pred_q <- coefficients[1] + coefficients[2] * Y + as.numeric(factors %*% coefficients[3:(2 + r)])
+  pred_q <- coefficients[1] + coefficients[2] * Y + as.numeric(factors %*% coefficients[3:(2 + r)])
     
   
   # Return here if strssed quantiles are not needed
-  if (is.null(Stressed_Factors)) {
-    return(list(Pred_q = Pred_q, Coeff = coefficients, Pvalues = pvalues, StdError = std_errors))
+  if (is.null(stressed_factors)) {
+    return(list(pred_q = pred_q, coeff = coefficients, pvalues = pvalues, stderr = std_errors))
   }
   
   
   # Predict with stressed factors (if provided)
-  Stressed_Pred_q <- coefficients[1] + coefficients[2] * Y + as.numeric(Stressed_Factors %*% coefficients[3:(2 + r)])
+  stressed_pred_q <- coefficients[1] + coefficients[2] * Y + as.numeric(stressed_factors %*% coefficients[3:(2 + r)])
   
   # return
-  return(list(Pred_q = Pred_q, Coeff = coefficients, Pvalues = pvalues, 
-              StdError = std_errors, Stressed_Pred_q = Stressed_Pred_q))
+  return(list(pred_q = pred_q, coeff = coefficients, pvalues = pvalues, 
+              stderr = std_errors, stressed_pred_q = stressed_pred_q))
   
 }
 

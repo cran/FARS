@@ -1,7 +1,7 @@
-#' @title Estimate Multilevel Dynamic Factor Model 
+#' @title Multi-Level Dynamic Factor Model (MLDFM)
 #'
-#' @description Estimates a multilevel dynamic factor model from time series data. 
-#' Supports both single-block and hierarchical multi-block structures with customizable factor extraction settings.
+#' @description Estimates a Multi-Level Dynamic Factor Modelfrom time series data. 
+#' Supports both Single-bBlock (DFM) and hierarchical Multi-Block (MLDFM) structures with customizable factor extraction settings.
 #'
 #' @param data A numeric matrix or data frame containing the time series data. Rows represent time points; columns represent observed variables.
 #' @param blocks Integer. Number of blocks into which the data is divided.
@@ -14,25 +14,19 @@
 #' @param max_iter Integer. The maximum number of iterations allowed for the RSS minimization process.
 #' @param verbose Logical. If \code{TRUE} (default), print a summary of the mldfm.
 #'
-#' @return An object of class \code{mldfm}, which is a list containing the following components:
+#' @return An object of class \code{mldfm}, which is a list containing:
 #' \describe{
-#'   \item{Factors}{Matrix of estimated factors.}
-#'   \item{Lambda}{Matrix of factor loadings.}
-#'   \item{Residuals}{Matrix of residuals.}
-#'   \item{Iterations}{Number of iterations before convergence.}
-#'   \item{Factors_list}{List of estimated factors for each node.}
+#'   \item{factors}{Matrix of estimated factors.}
+#'   \item{loadings}{Matrix of factor loadings.}
+#'   \item{residuals}{Matrix of residuals.}
+#'   \item{method}{Initialization method used (CCA or PCA).}
+#'   \item{iterations}{Number of iterations before convergence.}
+#'   \item{factors_list}{List of estimated factors for each node.}
+#'   \item{call}{Function call.}
 #' }
 #'
 #' @examples
-#' \donttest{
-#' data <- matrix(rnorm(1000), nrow = 100, ncol = 519)
-#' block_ind <- c(63, 311, 519)  # Defines 3 blocks
-#' local <- c(1, 1, 1)           # One local factor per block
-#' middle_layer <- list("1-3" = 1)
-#' result <- mldfm(data, blocks = 3, block_ind = block_ind, global = 1, 
-#' local = local, middle_layer = middle_layer)
-#' summary(result)
-#'}
+#' mldfm_result <- mldfm(data = matrix(rnorm(100 * 5), 100, 5), blocks = 1, global = 2)
 #'
 #' @export
 #' 
@@ -67,18 +61,18 @@ mldfm <- function(data, blocks = 1, block_ind = NULL, global = 1, local = NULL, 
     stop("Invalid number of blocks.")
   }
   
-  output <- list(
-    Factors = result$Factors,
-    Lambda = result$Lambda,
-    Residuals = result$Residuals,
-    Method = result$Method,
-    Iterations = result$Iterations,
-    Factors_list = result$Factors_list
+  structure(
+    list(
+      factors      = result$factors,
+      loadings     = result$loadings,
+      residuals    = result$residuals,
+      method       = result$method,
+      iterations   = result$iterations,
+      factors_list = result$factors_list,
+      call         = match.call()
+    ),
+    class = "mldfm"
   )
-  
-  class(output) <- "mldfm"
-  
-  return(output)
   
 }
 

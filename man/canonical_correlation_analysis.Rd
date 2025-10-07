@@ -2,37 +2,23 @@
 % Please edit documentation in R/canonical_correlation_analysis.R
 \name{canonical_correlation_analysis}
 \alias{canonical_correlation_analysis}
-\title{Canonical Correlation Analysis (for MLDFM)}
+\title{Canonical Correlation Analysis for MLDFM}
 \usage{
 canonical_correlation_analysis(y, Nregio, r_glob, r_reg)
 }
-\description{
-Computes factors using CCA across blocks, based on local PCA-extracted factors.
+\arguments{
+\item{y}{A numeric matrix containing all variables (T × N).}
+
+\item{Nregio}{Integer vector specifying the number of variables in each block.}
+
+\item{r_glob}{Integer. Number of global factors to be extracted.}
+
+\item{r_reg}{Integer vector. Number of regional (local) factors to be extracted for each block.}
 }
-\keyword{(final}
-\keyword{Nregio:}
-\keyword{all}
-\keyword{be}
-\keyword{containing}
-\keyword{each}
-\keyword{extracted}
-\keyword{factor}
-\keyword{factors}
-\keyword{global}
-\keyword{in}
+\value{
+A numeric matrix of estimated factors (T × \code{r_glob}).
+}
+\description{
+Performs Canonical Correlation Analysis (CCA)
+}
 \keyword{internal}
-\keyword{matrix}
-\keyword{node}
-\keyword{number}
-\keyword{of}
-\keyword{output)}
-\keyword{r_global:}
-\keyword{r_reg:}
-\keyword{regional}
-\keyword{specify}
-\keyword{the}
-\keyword{to}
-\keyword{variables}
-\keyword{vector}
-\keyword{which}
-\keyword{y:}

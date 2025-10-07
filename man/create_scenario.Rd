@@ -9,24 +9,31 @@ create_scenario(model, subsamples, alpha = 0.95, fpr = FALSE)
 \arguments{
 \item{model}{An object of class \code{mldfm}, containing the factor estimates.}
 
-\item{subsamples}{A list of \code{mldfm} objects returned from \code{mldfm_subsampling}.}
+\item{subsamples}{An object of class \code{mldfm_subsample}, returned by \code{mldfm_subsampling}.}
 
-\item{alpha}{Numeric. Confidence level (level of stress) for the hyperellipsoid (e.g., 0.95).}
+\item{alpha}{Numeric. Confidence level for the hyperellipsoids (e.g., 0.95).}
 
-\item{fpr}{Logical. If TRUE, uses the Adaptive Threshold Cross-Sectional Robust (FPR) Gamma as in Fresoli, Poncela and Ruiz (2024); otherwise, uses the standard time-varying (NG) Gamma.}
+\item{fpr}{Logical. If \code{TRUE}, uses FPR Gamma (Fresoli, Poncela, Ruiz, 2024); otherwise, uses standard time-varying Gamma.}
 }
 \value{
-A list of matrices representing the hyperellipsoid points for each time observation.
+An object of class \code{fars_scenario}, which is a list containing:
+\describe{
+\item{ellipsoids}{List of matrices defining the hyperellipsoids at each time.}
+\item{center}{Matrix of factor estimates (centers of the ellipsoids).}
+\item{sigma}{List of covariance matrices used to define the ellipsoids.}
+\item{periods}{Number of time observations.}
+\item{n_points}{Number of points used to define each ellipsoid.}
+\item{alpha}{Confidence level for the hyperellipsoids.}
+\item{call}{Function call.}
+}
 }
 \description{
-Constructs confidence regions (hyperellipsoids) for the factor space based on a central MLDFM estimate
-and a set of subsampled estimates. These regions capture estimation uncertainty and are used to simulate
-stresses scenarios.
+Constructs hyperellipsoids around MLDFM factor estimates using subsampling. These regions capture estimation uncertainty and allow for the simulation of stressed scenarios.
 }
 \examples{
 \donttest{
 data <- matrix(rnorm(100*300), nrow = 100, ncol = 300)
-block_ind <- c(150, 300)  # Defines 2 blocks
+block_ind <- c(150, 300)  
 global = 1
 local <- c(1, 1)   
 mldfm_result <- mldfm(data, blocks = 2, block_ind = block_ind, 

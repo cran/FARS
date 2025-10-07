@@ -1,6 +1,6 @@
-#' Correct Outliers in a Dataset
+#' @title Correct Dataset Outliers
 #'
-#' This function identifies and corrects outliers in a dataset using principal 
+#' @description This function identifies and corrects outliers in a dataset using principal 
 #' component analysis (PCA). It scales the data, performs PCA, computes idiosyncratic 
 #' components, and replaces values that fall outside a defined outlier threshold with 
 #' the median of 5 previous values. The outlier threshold is determined using the 

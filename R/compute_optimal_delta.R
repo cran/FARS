@@ -1,8 +1,9 @@
-#' Compute Optimal Delta for AT-CSR Thresholding (base-10 log version)
+#' @title Compute Optimal Delta for FPR Gamma Computation
 #'
-#' Computes the optimal threshold level delta following Qiu and Liyanage (2019),
-#' assuming all logs are base-10 as per the original paper.
+#' @description Computes the optimal threshold level delta.
 #'
+#' @return A single numeric value representing the optimal threshold level \code{delta}.
+#' 
 #' @importFrom stats pnorm
 #' @keywords internal
 #'

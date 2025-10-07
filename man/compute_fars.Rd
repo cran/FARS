@@ -2,59 +2,58 @@
 % Please edit documentation in R/compute_fars.R
 \name{compute_fars}
 \alias{compute_fars}
-\title{Compute Factor Augmented Quantile Regressions and Stressed Quantiles}
+\title{Compute Factor Augmented Quantile Regressions}
 \usage{
 compute_fars(
   dep_variable,
   factors,
   h = 1,
   edge = 0.05,
-  scenario = NULL,
+  ellipsoids = NULL,
   min = TRUE,
-  QTAU = 0.05
+  qtau = 0.05
 )
 }
 \arguments{
 \item{dep_variable}{A numeric vector representing the dependent variable (e.g., GDP growth, inflation).}
 
-\item{factors}{A matrix of factor estimates from a \code{mldfm} model.}
+\item{factors}{A matrix or data frame of factor estimates, typically extracted from an MLDFM model.}
 
-\item{h}{Integer. Forecast horizon (in time steps) for the quantile regression. Default is \code{1}.}
+\item{h}{Integer representing the forecast horizon (in time steps) for the quantile regression. Default is 1.}
 
-\item{edge}{Numeric. Trimming amount applied to the outermost quantiles (default \code{0.05}).}
+\item{edge}{Numeric value specifying the trimming amount applied to the outermost quantiles. Default is 0.05.}
 
-\item{scenario}{Optional list of matrices representing a stressed scenario, as returned by \code{create_scenario()}.}
+\item{ellipsoids}{Optional list of matrices (ellips) representing stressed scenario, as returned by \code{get_ellipsoids()}. If provided, the function computes stressed quantiles and stressed factors.}
 
-\item{min}{Logical. If \code{TRUE} (default), implement a stepwise minimization. If \code{FALSE}, implement a stepwise maximization.}
+\item{min}{Logical. If \code{TRUE} (default), the function performs stepwise minimization. If \code{FALSE}, it performs stepwise maximization.}
 
-\item{QTAU}{Numeric. Quantile level (default \code{0.05}) used to compute stressed factors via \code{compute_stressed_factors()}. Only used if \code{scenario} is provided.}
+\item{qtau}{Numeric. The quantile level (default is 0.05) used to compute stressed factors via \code{compute_stressed_factors()}. Only used if \code{ellipsoids} is provided.}
 }
 \value{
-A list containing:
+An object of class \code{fars}, which is a list containing:
 \describe{
-\item{\code{Quantiles}}{Matrix of forecasted quantiles (rows = time, cols = quantile levels).}
-\item{\code{Strssed_Quantiles}}{Matrix of stressed scenario quantiles (same format), returned only if \code{scenario} is provided.}
-\item{\code{Coeff}}{Matrix of quantile regression coefficients for each quantile.}
-\item{\code{Std. Error}}{Matrix of Std. Error for each regression coefficient.}
-\item{\code{Pvalue}}{Matrix of p-values for each regression coefficient.}
-\item{\code{QTAU}}{The quantile level used to compute stressed factors (if applicable).}
-\item{\code{Stressed_Factors}}{Matrix of selected stressed factors (only if \code{scenario} is provided and \code{QTAU} is set).}
+\item{\code{quantiles}}{Matrix of forecasted quantiles (rows = periods, cols = quantile levels).}
+\item{\code{coeff}}{Matrix of quantile regression coefficients for each quantile.}
+\item{\code{std_error}}{Matrix of standard errors for each regression coefficient.}
+\item{\code{pvalue}}{Matrix of p-values for each regression coefficient.}
+\item{\code{levels}}{The list of estimated quantiles.}
+\item{\code{qtau}}{The quantile level used to compute stressed factors (if applicable).}
+\item{\code{stressed_quantiles}}{Matrix of quantiles under stressed scenarios (only if \code{ellipsoids} is provided).}
+\item{\code{stressed_factors}}{Matrix of selected stressed factors (only if \code{ellipsoids} is provided).}
+\item{call}{Function call.}
 }
 }
 \description{
-Performs quantile regressions of a dependent variable on MLDFM-extracted factors.
-Optionally generates quantile forecasts under stressed scenarios using hyperellipsoids.
+Performs quantile regressions of a dependent variable on MLDFM factors.
+Optionally generates quantile forecasts under stressed scenarios using the ellipsoids.
 }
 \examples{
-\donttest{
 dep_variable <- rnorm(100)  # A numeric vector
 data <- matrix(rnorm(100*300), nrow = 100, ncol = 300)
 block_ind <- c(150, 300)  # Defines 2 blocks
 global = 1
 local <- c(1, 1)   
 mldfm_result <- mldfm(data, blocks = 2, block_ind = block_ind, global = global , local = local)
-fars_result <- compute_fars(dep_variable, mldfm_result$Factors, h = 1, edge = 0.05)
-}
- 
+fars_result <- compute_fars(dep_variable, get_factors(mldfm_result), h = 1, edge = 0.05)
  
 }

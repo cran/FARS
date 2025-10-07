@@ -2,11 +2,21 @@
 % Please edit documentation in R/update_factor_list.R
 \name{update_factor_list}
 \alias{update_factor_list}
-\title{Update Factor List from a given Factor Matrix}
+\title{Update Factor List}
 \usage{
-update_factor_list(Factor_list, FinalFactors, r_list)
+update_factor_list(factor_list, final_factors, r_list)
+}
+\arguments{
+\item{factor_list}{A named list of factors for each node in the hierarchy.}
+
+\item{final_factors}{A numeric matrix containing all factors (T × total number of factors).}
+
+\item{r_list}{A named list specifying the number of factors for each node (from \code{build_factor_structure}).}
+}
+\value{
+An updated named list of factors.
 }
 \description{
-Update Factor List from a given Factor Matrix
+Updates the list of factors at each hierarchical node by slicing from a matrix containing all final factors.
 }
 \keyword{internal}

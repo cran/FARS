@@ -2,7 +2,7 @@
 % Please edit documentation in R/mldfm.R
 \name{mldfm}
 \alias{mldfm}
-\title{Estimate Multilevel Dynamic Factor Model}
+\title{Multi-Level Dynamic Factor Model (MLDFM)}
 \usage{
 mldfm(
   data,
@@ -39,28 +39,22 @@ mldfm(
 \item{verbose}{Logical. If \code{TRUE} (default), print a summary of the mldfm.}
 }
 \value{
-An object of class \code{mldfm}, which is a list containing the following components:
+An object of class \code{mldfm}, which is a list containing:
 \describe{
-\item{Factors}{Matrix of estimated factors.}
-\item{Lambda}{Matrix of factor loadings.}
-\item{Residuals}{Matrix of residuals.}
-\item{Iterations}{Number of iterations before convergence.}
-\item{Factors_list}{List of estimated factors for each node.}
+\item{factors}{Matrix of estimated factors.}
+\item{loadings}{Matrix of factor loadings.}
+\item{residuals}{Matrix of residuals.}
+\item{method}{Initialization method used (CCA or PCA).}
+\item{iterations}{Number of iterations before convergence.}
+\item{factors_list}{List of estimated factors for each node.}
+\item{call}{Function call.}
 }
 }
 \description{
-Estimates a multilevel dynamic factor model from time series data.
-Supports both single-block and hierarchical multi-block structures with customizable factor extraction settings.
+Estimates a Multi-Level Dynamic Factor Modelfrom time series data.
+Supports both Single-bBlock (DFM) and hierarchical Multi-Block (MLDFM) structures with customizable factor extraction settings.
 }
 \examples{
-\donttest{
-data <- matrix(rnorm(1000), nrow = 100, ncol = 519)
-block_ind <- c(63, 311, 519)  # Defines 3 blocks
-local <- c(1, 1, 1)           # One local factor per block
-middle_layer <- list("1-3" = 1)
-result <- mldfm(data, blocks = 3, block_ind = block_ind, global = 1, 
-local = local, middle_layer = middle_layer)
-summary(result)
-}
+mldfm_result <- mldfm(data = matrix(rnorm(100 * 5), 100, 5), blocks = 1, global = 2)
 
 }

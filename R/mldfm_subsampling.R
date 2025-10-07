@@ -1,6 +1,6 @@
-#' Subsampling Procedure for MLDFM Estimation
+#' @title Subsampling Procedure for MLDFM Estimation
 #'
-#' Repeatedly applies the MLDFM estimation to randomly drawn subsamples of the input data.
+#' @description Applies the MLDFM estimation to randomly drawn subsamples of the input data.
 #'
 #' @param data A numeric matrix or data frame containing the time series data. Rows represent time points; columns represent observed variables.
 #' @param blocks Integer. The number of blocks into which the data is divided.
@@ -15,12 +15,19 @@
 #' @param sample_size Proportion of the original sample to retain (e.g., 0.9 for 90%).
 #' @param seed Optional integer. Seed for reproducibility of the subsampling process. If \code{NULL}, random draws will differ each run.
 #'
-#' @return A list of \code{mldfm} objects, one for each subsample.
-#' 
+#' @return An object of class \code{mldfm_subsample}, which is a list containing:
+#' \itemize{
+#'   \item \code{models}: A list of \code{mldfm} objects, one for each subsample.
+#'   \item \code{n_samples}: Number of subsamples generated.
+#'   \item \code{sample_size}: Proportion of the sample used for each subsample.
+#'   \item \code{seed}: Seed used for random sampling (if any).
+#'   \item \code{call}: Function call.
+#' }
+#'  
 #' @examples
 #' \donttest{
 #' data <- matrix(rnorm(1000), nrow = 100, ncol = 100)
-#' block_ind <- c(50,100)  # Defines 3 blocks
+#' block_ind <- c(50,100)  
 #' local <- c(1, 1)   
 #' result <- mldfm_subsampling(data, blocks = 2, block_ind = block_ind, global = 1, 
 #' local = local, n_samples = 100, sample_size = 0.9)
@@ -84,9 +91,17 @@ mldfm_subsampling <- function(data, blocks = 1, block_ind = NULL, global = 1,
   }
   
   # Final recap message
-  message("\nSubsampling completed.")
-  message(paste("Number of subsamples generated:", n_samples))
+  message("Subsampling completed.")
   
-  return(result)
+  structure(
+    list(
+      models = result,
+      n_samples = n_samples,
+      sample_size = sample_size,
+      seed = seed,
+      call = match.call()
+    ),
+    class = "mldfm_subsample"
+  )
 }
   
