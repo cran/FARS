@@ -443,8 +443,9 @@ plot_loadings.mldfm <- function(x, var_names = NULL, flip = NULL, ...) {
   # Standard errors and CIs
   se_vector <- apply(residuals, 2, sd) / sqrt(t)
   
+  
   loadings_long <- loadings_long %>%
-    mutate(SE = rep(se_vector, times = length(unique(.data$Factor))),
+    mutate(SE = rep(se_vector, each = length(unique(.data$Factor))),
            Loading_lower = .data$Loading - 1.96 * .data$SE,
            Loading_upper = .data$Loading + 1.96 * .data$SE)
   

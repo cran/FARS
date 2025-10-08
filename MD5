@@ -1,4 +1,4 @@
-344ced86a7925d513537ccb28c74c3da *DESCRIPTION
+413aa7039806e77065ef87720b1d9162 *DESCRIPTION
 0d19cac87f1e42e631501842f2d02cb3 *NAMESPACE
 1054525d8722a63c0b8e96c32b178d37 *R/apply_identifications.R
 52983c1bf7f30a9c320cfe4307df4947 *R/beta_ols.R
@@ -34,7 +34,7 @@ cb5e60882f4fb98f68dfcc536a60a6ce *R/mldfm_subsampling.R
 75caccf6ef8a29a14e97c4544a403084 *R/multiple_blocks.R
 e374d625ad45de9ae6a7682c43c73c79 *R/nl_density.R
 87e07d78ee8c30f08198ba15b55155a8 *R/orthogonalize_factors.R
-1f5a48bfcf2df8c3dfa1530a92f7b754 *R/plot.R
+57a1b957a1c66a493bdcf38b91c781b8 *R/plot.R
 9d269e2b13d25b421780a80ec8e3cc7c *R/print.R
 a7e8ade811474462e844fb1f34f69001 *R/q_reg.R
 8380af27133f306f533b31e88d094832 *R/quantile_risk.R
@@ -47,7 +47,7 @@ a5b60900dcdfd59f7531232778af0478 *data/dep_variable.rda
 b5988f4eea3757de93f1b9c84a62e782 *data/inflation_data.rda
 7f5d482108f1468d10dbd0872da35158 *data/mf_data.rda
 a12199358bb8707c61906ad7d784bb45 *inst/CITATION
-9a4f84fa48a334392cd6d640e54d4fe7 *inst/doc/Factor_Augmented_Regression_Scenarios_in_R.pdf
+248ceda159dff8597a7514a6137c30ce *inst/doc/Factor_Augmented_Regression_Scenarios_in_R.pdf
 c8c486608d40c1f4cc176843aceb95bf *inst/doc/Factor_Augmented_Regression_Scenarios_in_R.pdf.asis
 c584438f51980a7e978cb6e7c5a0a0a3 *inst/extdata/Inflation.xlsx
 a6599c95fbf9831bb86fabd8d5ae4ce8 *man/apply_identifications.Rd
