@@ -4,25 +4,40 @@
 \alias{compute_stressed_factors}
 \title{Compute Stressed Factors}
 \usage{
-compute_stressed_factors(dep_variable, factors, ellipsoids, h, qtau, min)
+compute_stressed_factors(
+  dep_variable,
+  factors,
+  ellipsoids,
+  h = 1,
+  qtau = 0.05,
+  direction = c("min", "max")
+)
 }
 \arguments{
-\item{dep_variable}{A numeric vector representing the dependent variable (e.g., GDP growth, inflation).}
+\item{dep_variable}{Numeric vector of length T representing the dependent variable (e.g., GDP growth, inflation).}
 
-\item{factors}{A matrix or data frame of factor estimates, typically extracted from an MLDFM model.}
+\item{factors}{Numeric matrix or data frame of dimension T x r, containing factor estimates.}
 
-\item{ellipsoids}{A list of matrices, where each matrix represents a stressed ellipsoid for a given time period.}
+\item{ellipsoids}{List of matrices. Each matrix represents a stressed ellipsoid for a given time period.}
 
-\item{h}{Integer representing the forecast horizon (in time steps). It defines the lag used in regression.}
+\item{h}{Integer (>= 1). Lag order used in the regression (default = 1)}
 
-\item{qtau}{Numeric. The quantile level used in quantile regression (default is 0.05).}
+\item{qtau}{Numeric between 0 and 1. The quantile level used in quantile regression (default = 0.05).}
 
-\item{min}{Logical. If \code{TRUE}, the function uses a stepwise minimization method. If \code{FALSE}, it uses a stepwise maximization method.}
+\item{direction}{Character, either "min" or "max". Determines whether to minimize or maximize}
 }
 \value{
-A matrix of stressed factors, with each row representing a time period and each column representing a factor.
+A numeric matrix of dimension T x r containing the stressed factors for each time period.
 }
 \description{
 Computes stressed factors.
 }
-\keyword{internal}
+\examples{
+set.seed(42)
+T <- 100; r <- 3
+Y <- rnorm(T)
+F <- matrix(rnorm(T * r), T, r)          
+E <- replicate(T, matrix(rnorm(50 * r), nrow = 50, ncol = r), simplify = FALSE)
+stressed_factors <- compute_stressed_factors(Y, F, E, h = 1, qtau = 0.05, direction = "min")
+
+}

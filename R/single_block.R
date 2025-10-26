@@ -10,6 +10,7 @@
 #'   \item{factors}{Matrix of estimated factors.}
 #'   \item{loadings}{Matrix of factor loadings.}
 #'   \item{residuals}{Matrix of residuals.}
+#'   \item{fitted}{Matrix of fitted values.}
 #'   \item{method}{Method used for factor extraction ("PCA").}
 #'   \item{iterations}{Number of iterations before convergence (always 0 for single block).}
 #'   \item{factors_list}{List of estimated factors for each node.}
@@ -28,16 +29,6 @@ single_block <- function(data, r) {
   T <- nrow(X)
   N <- ncol(X)
   
-  # # Eigen decomposition
-  # eig_res <- eigen(X %*% t(X))
-  # values <- eig_res$values[1:r]
-  # vectors <- eig_res$vectors[, 1:r, drop = FALSE]
-  # 
-  # # Extract factors 
-  # factors <- sqrt(T) * vectors
-  # loadings <- (1 / T) * t(factors) %*% X
-  
-
   # PCA
   pca_res <- prcomp(X, center = FALSE, scale. = FALSE)
   factors_tmp <- pca_res$x[, 1:r, drop = FALSE]             # T × r
@@ -56,8 +47,11 @@ single_block <- function(data, r) {
   attr(factors, "scaled:scale") <- NULL
   loadings <- unname(as.matrix(loadings))
 
+  # Fitted 
+  fitted <- factors %*% loadings
+  
   # Residuals 
-  residuals <- X - factors %*% loadings
+  residuals <- X - fitted
   
   # Factor structure 
   factors_list <- list()
@@ -67,8 +61,9 @@ single_block <- function(data, r) {
   
   return(list(
     factors = factors,
-    loadings = t(loadings), # output should be N × r
+    loadings = t(loadings), # N × r
     residuals = residuals,
+    fitted = fitted,
     method = "PCA",
     iterations = iteration,
     factors_list = factors_list

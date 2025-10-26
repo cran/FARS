@@ -16,6 +16,7 @@
 #'   \item{factors}{Matrix of estimated factors.}
 #'   \item{loadings}{Matrix of factor loadings.}
 #'   \item{residuals}{Matrix of residuals.}
+#'   \item{fitted}{Matrix of fitted values.}
 #'   \item{method}{Initialization method used (CCA or PCA).}
 #'   \item{iterations}{Number of iterations before convergence.}
 #'   \item{factors_list}{List of estimated factors for each node.}
@@ -77,9 +78,10 @@ multiple_blocks<-function(data, global, local, middle_layer, block_ind, tol, max
     loadings_list <- loadings_res$loadings_list
     
     # Update factors
-    final_factors <- t(solve(loadings %*% t(loadings)) %*% loadings %*% t(data))
-    # inv_LtL <- ginv(loadings %*% t(loadings))
-    # FinalFactors <- t(inv_LtL %*% loadings %*% t(data))
+    LtL <- tcrossprod(loadings)                    # r x r
+    LDt <- loadings %*% t(data)                    # r x T
+    final_factors <- t(solve(LtL, LDt))            # T x r
+    #final_factors <- t(solve(loadings %*% t(loadings)) %*% loadings %*% t(data))
     
     # Update factor list
     factor_list <- update_factor_list(factor_list, final_factors, r_list)
@@ -100,8 +102,11 @@ multiple_blocks<-function(data, global, local, middle_layer, block_ind, tol, max
   factor_list <- id_res$factor_list
   loadings <- id_res$loadings
   
+  # Fitted
+  fitted <- orthogonal_factors %*% loadings
+  
   # Final residuals
-  residuals <- data - orthogonal_factors %*% loadings
+  residuals <- data - fitted
   
   # Drop column names
   orthogonal_factors <- unname(orthogonal_factors)
@@ -111,6 +116,7 @@ multiple_blocks<-function(data, global, local, middle_layer, block_ind, tol, max
     factors = orthogonal_factors,
     loadings = t(loadings),
     residuals = residuals,
+    fitted = fitted,
     method = if (method == 0) "CCA" else "PCA",
     iterations = iteration,
     factors_list = r_list

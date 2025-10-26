@@ -15,6 +15,5 @@
 The input \code{fars} object, returned invisibly.
 }
 \description{
-Prints a complete summary of the fars object, including information on estimated quantiles, stressed quantiles,
-regression coefficients, standard errors, and p-values.
+Displays summaries of all quantile regressions stored in a \code{fars} object.
 }

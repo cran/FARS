@@ -4,10 +4,13 @@
 \alias{plot.fars}
 \title{Plot Method for \code{fars} Object}
 \usage{
-\method{plot}{fars}(x, dates = NULL, ...)
+\method{plot}{fars}(x, newdata = NULL, dates = NULL, ...)
 }
 \arguments{
 \item{x}{An object of class \code{fars}.}
+
+\item{newdata}{Optional matrix or data frame with one column for the lagged dependent variable
+and \code{r} columns for the factors (same \code{r} used in \code{compute_fars()}).}
 
 \item{dates}{Optional vector of dates (as \code{Date} or \code{zoo::yearqtr}) to use for the x-axis.
 If not provided, a simple index is used.}
@@ -15,9 +18,11 @@ If not provided, a simple index is used.}
 \item{...}{Additional arguments (ignored).}
 }
 \value{
-No return value. Called for plot generation.
+Invisibly returns a \code{ggplot} object.
 }
 \description{
-Generates line plots of estimated quantiles from a \code{fars} object.
-If a stressed scenario is available, it is plotted in a separate panel.
+Generates a line plot of the estimated quantiles from a \code{fars} object.
+If \code{newdata} is \code{NULL}, the function plots in-sample fitted quantiles; otherwise,
+it plots predictions computed on \code{newdata}. The x-axis can be indexed by a provided
+\code{dates} vector; if missing, an integer index is used.
 }

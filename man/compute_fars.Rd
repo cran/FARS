@@ -4,56 +4,36 @@
 \alias{compute_fars}
 \title{Compute Factor Augmented Quantile Regressions}
 \usage{
-compute_fars(
-  dep_variable,
-  factors,
-  h = 1,
-  edge = 0.05,
-  ellipsoids = NULL,
-  min = TRUE,
-  qtau = 0.05
-)
+compute_fars(dep_variable, factors, h = 1, edge = 0.05)
 }
 \arguments{
-\item{dep_variable}{A numeric vector representing the dependent variable (e.g., GDP growth, inflation).}
+\item{dep_variable}{Numeric vector of length T representing the dependent variable (e.g., GDP growth, inflation).}
 
-\item{factors}{A matrix or data frame of factor estimates, typically extracted from an MLDFM model.}
+\item{factors}{Numeric matrix or data frame of dimension T x r, containing factor estimates.}
 
-\item{h}{Integer representing the forecast horizon (in time steps) for the quantile regression. Default is 1.}
+\item{h}{Integer (>= 1). Lag order used in the regression (default = 1)}
 
 \item{edge}{Numeric value specifying the trimming amount applied to the outermost quantiles. Default is 0.05.}
-
-\item{ellipsoids}{Optional list of matrices (ellips) representing stressed scenario, as returned by \code{get_ellipsoids()}. If provided, the function computes stressed quantiles and stressed factors.}
-
-\item{min}{Logical. If \code{TRUE} (default), the function performs stepwise minimization. If \code{FALSE}, it performs stepwise maximization.}
-
-\item{qtau}{Numeric. The quantile level (default is 0.05) used to compute stressed factors via \code{compute_stressed_factors()}. Only used if \code{ellipsoids} is provided.}
 }
 \value{
 An object of class \code{fars}, which is a list containing:
 \describe{
-\item{\code{quantiles}}{Matrix of forecasted quantiles (rows = periods, cols = quantile levels).}
-\item{\code{coeff}}{Matrix of quantile regression coefficients for each quantile.}
-\item{\code{std_error}}{Matrix of standard errors for each regression coefficient.}
-\item{\code{pvalue}}{Matrix of p-values for each regression coefficient.}
-\item{\code{levels}}{The list of estimated quantiles.}
-\item{\code{qtau}}{The quantile level used to compute stressed factors (if applicable).}
-\item{\code{stressed_quantiles}}{Matrix of quantiles under stressed scenarios (only if \code{ellipsoids} is provided).}
-\item{\code{stressed_factors}}{Matrix of selected stressed factors (only if \code{ellipsoids} is provided).}
-\item{call}{Function call.}
+\item{\code{models}}{List of five S3 \code{quantreg::rq} fitted objects named \code{tau_0.xx}.}
+\item{\code{h}}{The forecast horizon used.}
+\item{\code{levels}}{The vector of quantile levels effectively estimated
+(\code{c(edge, 0.25, 0.50, 0.75, 1 - edge)}).}
+.  \item{\code{periods}}{Integer. The number of fitted periods}
+\item{\code{n_factors}}{Integer. The number of factors included in the regression.}
+\item{\code{call}}{The matched function call.}
 }
 }
 \description{
-Performs quantile regressions of a dependent variable on MLDFM factors.
-Optionally generates quantile forecasts under stressed scenarios using the ellipsoids.
+Performs quantile regressions of a dependent variable on factors estimates.
 }
 \examples{
-dep_variable <- rnorm(100)  # A numeric vector
-data <- matrix(rnorm(100*300), nrow = 100, ncol = 300)
-block_ind <- c(150, 300)  # Defines 2 blocks
-global = 1
-local <- c(1, 1)   
-mldfm_result <- mldfm(data, blocks = 2, block_ind = block_ind, global = global , local = local)
-fars_result <- compute_fars(dep_variable, get_factors(mldfm_result), h = 1, edge = 0.05)
- 
+set.seed(123)
+T <- 100; r <- 3
+Y <- rnorm(T)
+F <- matrix(rnorm(T * r), T, r)      
+fars_result <- compute_fars(dep_variable = Y, factors = F, h = 1, edge = 0.05)
 }

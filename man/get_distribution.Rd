@@ -4,10 +4,10 @@
 \alias{get_distribution}
 \title{Generic Function to Extract Distribution}
 \usage{
-get_distribution(x, ...)
+get_distribution(object, ...)
 }
 \arguments{
-\item{x}{An object from which to extract the distribution.}
+\item{object}{An object from which to extract the distribution.}
 
 \item{...}{Additional arguments (ignored).}
 }

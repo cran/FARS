@@ -39,121 +39,106 @@
 #' @importFrom stats qnorm 
 #'
 #' @export
-create_scenario <- function(model, subsamples, alpha=0.95, fpr = FALSE) {
-  
+create_scenario <- function(model, subsamples, alpha = 0.95, fpr = FALSE) {
   
   if (!inherits(model, "mldfm")) stop("model must be an object of class 'mldfm'.")
   if (!inherits(subsamples, "mldfm_subsample")) stop("subsamples must be an object of class 'mldfm_subsample'.")
   if (!is.numeric(alpha) || alpha <= 0 || alpha >= 1) stop("alpha must be a numeric value in (0, 1).")
   if (!is.logical(fpr) || length(fpr) != 1) stop("fpr must be a logical value (TRUE or FALSE).")
   
+  # Extract model information
+  factors   <- factors(model)         # T x K
+  loadings  <- loadings(model)        # N x K
+  residuals <- residuals(model)       # T x N
   
-  # Extract model info
-  factors <- get_factors(model)
-  loadings <- get_loadings(model)
-  residuals <- get_residuals(model)
-  
-  #Extraxt subsamples factors
+  # Extract subsample factors
   subsamples_list <- get_mldfm_list(subsamples)
-  factors_samples <- lapply(subsamples_list, get_factors)
+  factors_samples <- lapply(subsamples_list, factors)
   
+  # Dimensions
+  n_obs         <- nrow(factors)
+  n_var         <- nrow(loadings)
+  tot_n_factors <- ncol(factors)
+  n_samples     <- length(factors_samples)
+  n_var_sample  <- nrow(loadings(subsamples_list[[1]]))
   
-  # Initialize
-  n_obs <- nrow(factors)
-  n_var <- nrow(loadings)
-  tot_n_factors <-  ncol(factors)
-  n_samples <- length(factors_samples)
-  n_var_sample <- nrow(get_loadings(subsamples_list[[1]]))
+  message(paste0(
+    "Constructing scenario using ", n_samples,
+    " subsamples, alpha = ", alpha, " and ",
+    ifelse(fpr, "FPR Gamma", "standard time-varying Gamma"), "..."
+  ))
   
-  
-  message(paste0("Constructing scenario using ", n_samples, " subsamples, alpha = ", 
-                 alpha, " and ", ifelse(fpr, "FPR Gamma", "standard time-varying Gamma"), "..."))
-  
-  
-  
-  # Set ellipsoid center for each obs
+  # Center of each hyperellipsoid
   center_matrix <- factors
   
-  # Compute the inverse of the loading matrix
+  # Compute (L'L / N)^(-1)
   inv_loadings <- solve(crossprod(loadings) / n_var)
   
-  # Initialize sigma 
+  # Align factor signs once per subsample
+  align_one <- function(Fs, F0) {
+    sgn <- sign(colSums(F0 * Fs))
+    sgn[sgn == 0] <- 1L
+    Fs * rep(sgn, each = nrow(Fs))
+  }
+  factors_samples <- lapply(factors_samples, align_one, F0 = factors)
+  
+  # Initialize sigma list
   sigma_list <- vector("list", n_obs)
   
-  # Compute FPR gamma if needed
-  if(fpr){
-    gamma <- compute_fpr_gamma(residuals, loadings)
+  # Precompute FPR gamma if required
+  if (fpr) {
+    gamma_fpr <- compute_fpr_gamma(residuals, loadings)
   }
- 
-  for (obs in 1:n_obs) {
-    # Compute normal gamma 
-    if(!fpr){
+  
+  # Loop over time observations
+  for (obs in seq_len(n_obs)) {
+    
+    # Compute gamma_t
+    if (!fpr) {
       d <- residuals[obs, ]^2
-      gamma <- crossprod(loadings, loadings * d) / n_var
-    }
-      
-    # Compute Sigma
-    term2 <- matrix(0, nrow = tot_n_factors, ncol = tot_n_factors)
-    for(s in 1:n_samples){
-      factors_sample <- factors_samples[[s]]
-      factors_sample <- as.matrix(factors_sample)
-      
-      # Align signs to the original factors
-      for (ff in 1:tot_n_factors) {
-        inv_sample <- (-1) * factors_sample[, ff]
-        diff1 <- sum(abs(factors[, ff] - factors_sample[, ff]))
-        diff2 <- sum(abs(factors[, ff] - inv_sample))
-
-        if (diff2 < diff1) {
-          factors_sample[, ff] <- inv_sample
-        }
-      }
-
-      
-      factors_obs <- factors[obs,,drop = FALSE]
-      factors_sample_obs <- factors_sample[obs,,drop = FALSE]
-      
-     
-      diff <- factors_sample_obs - factors_obs
-      term2 <- term2 + (t(diff) %*% diff) 
-      
+      gamma <- crossprod(loadings * rep(sqrt(d), times = 1L)) / n_var
+    } else {
+      gamma <- gamma_fpr
     }
     
-    sigma <- (1/n_var) * inv_loadings %*%  gamma %*% inv_loadings + (n_var_sample/(n_var*n_samples)*term2) # maldonado and ruiz
+    # Compute term2 (empirical uncertainty from subsamples)
+    term2 <- matrix(0, nrow = tot_n_factors, ncol = tot_n_factors)
+    f_ref <- center_matrix[obs, , drop = FALSE]
+    for (s in seq_len(n_samples)) {
+      f_s_obs <- factors_samples[[s]][obs, , drop = FALSE]
+      diff    <- f_s_obs - f_ref
+      term2   <- term2 + tcrossprod(drop(diff))
+    }
+    
+    # Total covariance: Maldonado & Ruiz 
+    sigma <- (1 / n_var) * (inv_loadings %*% gamma %*% inv_loadings) +
+      (n_var_sample / (n_var * n_samples)) * term2
+    
     sigma_list[[obs]] <- sigma
   }
- 
-   
-  # hyper_ellipsoids 
-  hyper_ellipsoids <- vector("list", n_obs)
   
-  # Loop over each observation and compute the hyperellipsoid
-  for (obs in 1:n_obs) {
+  # Build hyperellipsoids
+  hyper_ellipsoids <- vector("list", n_obs)
+  calpha <- sizeparam_normal_distn(alpha, d = tot_n_factors)
+  
+  for (obs in seq_len(n_obs)) {
+    center_obs <- center_matrix[obs, ]
+    sigma_obs  <- sigma_list[[obs]]
     
-    center_obs <- center_matrix[obs,]
-    sigma_obs <- sigma_list[[obs]]    
-    
-    calpha <- sizeparam_normal_distn(alpha, d=tot_n_factors)  # Size parameter 
-
     if (tot_n_factors > 2) {
-      # More than 2 dimensions
       h_ellip <- hyperellipsoid(center_obs, solve(sigma_obs), calpha)
       hyper_ellipsoids[[obs]] <- t(hypercube_mesh(8, h_ellip, TRUE))
     } else if (tot_n_factors == 2) {
-      # 2D ellipse
       hyper_ellipsoids[[obs]] <- ellipse(sigma_obs, centre = center_obs, level = alpha, npoints = 300)
-    } else if (tot_n_factors == 1) {
-      # 1D confidence interval
-      se <- sqrt(sigma_obs[1, 1])  
-      z_alpha <- qnorm((1 + alpha) / 2)  
-      lower <- center_obs - z_alpha * se
-      upper <- center_obs + z_alpha * se
-      hyper_ellipsoids[[obs]] <- matrix(c(lower, upper), ncol = 1)  # 2row matrix: lower and upper 
+    } else {
+      se     <- sqrt(sigma_obs[1, 1])
+      z_alph <- qnorm((1 + alpha) / 2)
+      lower  <- center_obs - z_alph * se
+      upper  <- center_obs + z_alph * se
+      hyper_ellipsoids[[obs]] <- matrix(c(lower, upper), ncol = 1)
     }
-    
-    
-    
   }
+  
   message("Scenario construction completed.")
   
   structure(
@@ -168,6 +153,4 @@ create_scenario <- function(model, subsamples, alpha=0.95, fpr = FALSE) {
     ),
     class = "fars_scenario"
   )
-  
-  
 }

@@ -17,6 +17,7 @@ A list with elements:
 \item{factors}{Matrix of estimated factors.}
 \item{loadings}{Matrix of factor loadings.}
 \item{residuals}{Matrix of residuals.}
+\item{fitted}{Matrix of fitted values.}
 \item{method}{Method used for factor extraction ("PCA").}
 \item{iterations}{Number of iterations before convergence (always 0 for single block).}
 \item{factors_list}{List of estimated factors for each node.}

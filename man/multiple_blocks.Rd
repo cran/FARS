@@ -38,6 +38,7 @@ A list with elements:
 \item{factors}{Matrix of estimated factors.}
 \item{loadings}{Matrix of factor loadings.}
 \item{residuals}{Matrix of residuals.}
+\item{fitted}{Matrix of fitted values.}
 \item{method}{Initialization method used (CCA or PCA).}
 \item{iterations}{Number of iterations before convergence.}
 \item{factors_list}{List of estimated factors for each node.}

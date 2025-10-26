@@ -17,7 +17,6 @@
 #' @export
 plot.mldfm <- function(x, which = "factors", dates = NULL, var_names = NULL, flip = NULL, fpr = FALSE, ...) {
   
-  stopifnot(inherits(x, "mldfm"))
   if (!is.logical(fpr) || length(fpr) != 1) stop("fpr must be a logical value (TRUE or FALSE).")
   
   
@@ -46,8 +45,7 @@ plot.mldfm <- function(x, which = "factors", dates = NULL, var_names = NULL, fli
 #' @method plot mldfm_subsample
 #' @export
 plot.mldfm_subsample <- function(x, ...) {
-  stopifnot(inherits(x, "mldfm_subsample"))
-  
+
   iterations <- sapply(x$models, function(m) m$iterations)
   df <- data.frame(Iterations = iterations)
   
@@ -67,73 +65,58 @@ plot.mldfm_subsample <- function(x, ...) {
 
 #' @title Plot Method for \code{fars} Object
 #'
-#' @description Generates line plots of estimated quantiles from a \code{fars} object. 
-#' If a stressed scenario is available, it is plotted in a separate panel.
+#' @description
+#' Generates a line plot of the estimated quantiles from a \code{fars} object.
+#' If \code{newdata} is \code{NULL}, the function plots in-sample fitted quantiles; otherwise,
+#' it plots predictions computed on \code{newdata}. The x-axis can be indexed by a provided
+#' \code{dates} vector; if missing, an integer index is used.
 #'
 #' @param x An object of class \code{fars}.
+#' @param newdata Optional matrix or data frame with one column for the lagged dependent variable
+#'   and \code{r} columns for the factors (same \code{r} used in \code{compute_fars()}).
 #' @param dates Optional vector of dates (as \code{Date} or \code{zoo::yearqtr}) to use for the x-axis. 
 #' If not provided, a simple index is used.
 #' @param ... Additional arguments (ignored).
 #'
-#' @return No return value. Called for plot generation.
+#' @return Invisibly returns a \code{ggplot} object.
 #'
 #' @import ggplot2
 #' @importFrom reshape2 melt
 #' @importFrom rlang .data
 #' @method plot fars
 #' @export
-plot.fars <- function(x, dates = NULL, ...) {
-  stopifnot(inherits(x, "fars"))
+plot.fars <- function(x, newdata = NULL, dates = NULL, ...) {
   
-  # Prepare data
-  quantiles <- x$quantiles
-  scenario <- x$stressed_quantiles
-  levels <- x$levels
+  # Extract quantiles
+  quantiles <- if (is.null(newdata)) {
+    fitted(x)
+  } else {
+    predict(x, newdata = newdata)
+  }
+  
+  levels <- get_quantile_levels(x)
   
   if (is.null(dates)) {
     dates <- 1:nrow(quantiles)
   }
   
-  # Compute global min and max
-  y_min <- min(quantiles, na.rm = TRUE)
-  y_max <- max(quantiles, na.rm = TRUE)
-  if (!is.null(scenario)) {
-    y_min <- min(y_min, min(scenario, na.rm = TRUE))
-    y_max <- max(y_max, max(scenario, na.rm = TRUE))
-  }
-  y_range <- c(y_min, y_max)
-  
-  # --- Forecasted Quantiles ---
+ 
+  # Plot
   df <- as.data.frame(quantiles)
-  colnames(df) <- paste0("Q", levels)
+  colnames(df) <- levels
   df$Time <- dates
   df_long <- reshape2::melt(df, id.vars = "Time", variable.name = "Quantile", value.name = "Value")
   
   p_main <- ggplot(df_long, aes(x = .data$Time, y = .data$Value, color = .data$Quantile)) +
     geom_line(linewidth = 1) +
-    labs(title = "Quantiles",
-         y = "Value", x = "Time") +
-    scale_y_continuous(limits = y_range) +
+    labs(y = "Value", x = "Time") +
+    #scale_y_continuous(limits = y_range) +
     theme_minimal()
   
   print(p_main)
+  invisible(p_main)
   
-  # --- Stressed Quantiles (if available) ---
-  if (!is.null(scenario)) {
-    df_s <- as.data.frame(scenario)
-    colnames(df_s) <- paste0("Q", levels)
-    df_s$Time <- dates
-    df_s_long <- reshape2::melt(df_s, id.vars = "Time", variable.name = "Quantile", value.name = "Value")
-    
-    p_stress <- ggplot(df_s_long, aes(x = .data$Time, y = .data$Value, color = .data$Quantile)) +
-      geom_line(linewidth = 1) +
-      labs(title = "Stressed Quantiles",
-           y = "Value", x = "Time") +
-      scale_y_continuous(limits = y_range) +
-      theme_minimal()
-    
-    print(p_stress)
-  }
+ 
 }
 
 
@@ -149,7 +132,6 @@ plot.fars <- function(x, dates = NULL, ...) {
 #' @importFrom graphics segments points axis
 #' @export
 plot.fars_scenario <- function(x, obs = 1, ...) {
-  stopifnot(inherits(x, "fars_scenario"))
   
   K <- ncol(x$center)
   T <- x$periods
@@ -202,7 +184,6 @@ plot.fars_scenario <- function(x, obs = 1, ...) {
 #' @method plot fars_density
 #' @export
 plot.fars_density <- function(x, time_index = NULL, ...) {
-  stopifnot(inherits(x, "fars_density"))
   
   
   # Extract components
@@ -260,11 +241,10 @@ plot.fars_density <- function(x, time_index = NULL, ...) {
 #'
 #' @keywords internal
 plot_factors.mldfm <- function(x, dates = NULL, flip = NULL, fpr = FALSE, ...) {
-  stopifnot(inherits(x, "mldfm"))
   
-  factors   <- get_factors(x)
-  loadings  <- get_loadings(x)
-  residuals <- get_residuals(x)
+  factors   <- factors(x)
+  loadings  <- loadings(x)
+  residuals <- residuals(x)
   
   T_obs  <- nrow(residuals)
   N_vars <- ncol(residuals)
@@ -386,11 +366,10 @@ plot_factors.mldfm <- function(x, dates = NULL, flip = NULL, fpr = FALSE, ...) {
 #'
 #' @keywords internal
 plot_loadings.mldfm <- function(x, var_names = NULL, flip = NULL, ...) {
-  stopifnot(inherits(x, "mldfm"))
   
-  factors   <- get_factors(x)
-  loadings  <- get_loadings(x)
-  residuals <- get_residuals(x)
+  factors   <- factors(x)
+  loadings  <- loadings(x)
+  residuals <- residuals(x)
   
   t <- nrow(residuals)
   N <- ncol(residuals)
@@ -497,9 +476,8 @@ plot_loadings.mldfm <- function(x, var_names = NULL, flip = NULL, ...) {
 #'
 #' @keywords internal
 plot_residuals.mldfm <- function(x, var_names = NULL, ...) {
-  stopifnot(inherits(x, "mldfm"))
   
-  residuals <- get_residuals(x)
+  residuals <- residuals(x)
   n_vars <- ncol(residuals)
   
   country_names <- if (is.null(var_names)) {

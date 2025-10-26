@@ -16,36 +16,27 @@ compute_fpr_gamma <- function(residuals, loadings) {
   N <- ncol(residuals)
   K <- ncol(loadings)
   
-  # Compute residual covariance matrix sigma_ij
-  Sigma_eps <- (1 / T) * t(residuals) %*% residuals  # N x N
+  # Sigma_eps
+  Sigma_eps <- crossprod(residuals) / T
   
-  # Compute variance of residual product theta_ij
-  Theta <- matrix(0, N, N)
-  for (i in 1:N) {
-    for (j in 1:N) {
-      e_prod <- residuals[, i] * residuals[, j]
-      sigma_ij <- Sigma_eps[i, j]
-      Theta[i, j] <- mean((e_prod - sigma_ij)^2)
-    }
-  }
+  # Theta
+  E2 <- residuals^2
+  Theta <- crossprod(E2) / T - Sigma_eps^2
+  Theta[Theta < 0] <- 0
   
-  # Compute adaptive threshold c_ij
+  # Adaptive threshold
   omega_NT <- 1 / sqrt(N) + sqrt(log10(N) / T)
-  delta <- compute_optimal_delta(Sigma_eps, Theta, T) 
-    
-  
+  delta <- compute_optimal_delta(Sigma_eps, Theta, T)
   C <- delta * omega_NT * sqrt(Theta)
   
-  # Compute AT-CSR gamma
-  gamma <- matrix(0, K, K)
-  for (i in 1:N) {
-    for (j in 1:N) {
-      if (abs(Sigma_eps[i, j]) >= C[i, j]) {
-        gamma <- gamma + Sigma_eps[i, j] * (t(loadings[i, , drop = FALSE]) %*% loadings[j, , drop = FALSE])
-      }
-    }
-  }
+  # Thresholded covariance 
+  keep <- abs(Sigma_eps) >= C
+  S_thresh <- Sigma_eps
+  S_thresh[!keep] <- 0
   
-  gamma <- gamma / N
-  return(gamma)
+  # Gamma
+  gamma <- crossprod(loadings, S_thresh %*% loadings) / N
+  
+  
+  gamma
 }

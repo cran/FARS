@@ -10,9 +10,8 @@
 #' @method summary mldfm
 #' @export
 summary.mldfm <- function(object, ...) {
-  stopifnot(inherits(object, "mldfm"))
-  factors <- get_factors(object)
-  residuals <- get_residuals(object)
+  factors <- factors(object)
+  residuals <- residuals(object)
   
   cat("Summary of Multilevel Dynamic Factor Model (MLDFM)\n")
   cat("===================================================\n")
@@ -56,8 +55,7 @@ summary.mldfm <- function(object, ...) {
 #' @method summary mldfm_subsample
 #' @export
 summary.mldfm_subsample <- function(object, ...) {
-  stopifnot(inherits(object, "mldfm_subsample"))
-  
+
   cat("Summary of MLDFM Subsampling\n")
   cat("=============================\n")
   cat("Number of subsamples :", object$n_samples, "\n")
@@ -65,8 +63,8 @@ summary.mldfm_subsample <- function(object, ...) {
   if (!is.null(object$seed)) cat("Seed used            :", object$seed, "\n")
   
   if (length(object$models) > 0 && inherits(object$models[[1]], "mldfm")) {
-    T_obs <- nrow(get_residuals(object$models[[1]]))
-    N_vars <- ncol(get_residuals(object$models[[1]]))
+    T_obs <- nrow(residuals(object$models[[1]]))
+    N_vars <- ncol(residuals(object$models[[1]]))
     cat("Data dimensions      :", T_obs, "periods,", N_vars, "variables\n")
     
     # Factor structure from first model
@@ -87,7 +85,7 @@ summary.mldfm_subsample <- function(object, ...) {
     
     # Compute RSS from residuals
     rss_vals <- sapply(object$models, function(m) {
-      res <- get_residuals(m)
+      res <- residuals(m)
       sum(res^2, na.rm = TRUE)
     })
     cat("Final RSS        : mean =", round(mean(rss_vals), 2),
@@ -100,8 +98,7 @@ summary.mldfm_subsample <- function(object, ...) {
 
 #' @title Summary Method for \code{fars} Object
 #'
-#' @description Prints a complete summary of the fars object, including information on estimated quantiles, stressed quantiles,
-#' regression coefficients, standard errors, and p-values.
+#' @description Displays summaries of all quantile regressions stored in a \code{fars} object.
 #'
 #' @param object An object of class \code{fars}.
 #' @param ... Additional arguments (ignored).
@@ -115,27 +112,12 @@ summary.fars <- function(object, ...) {
   cat("===========================================\n")
   cat("Summary of Quantile Regressions\n\n")
   
-  levels <- object$levels
-  coeff <- object$coeff
-  stderr <- object$std_error
-  pval <- object$pvalue
-  variables <- rownames(coeff)
+  levels <- get_quantile_levels(object)
+  models <- object$models
   
-  for (i in seq_along(levels)) {
-    cat(sprintf("-------------------------\n Quantile: %.2f \n-------------------------\n", levels[i]))
-    est <- coeff[, i]
-    se <- stderr[, i]
-    p <- pval[, i]
-    
-    summary_df <- data.frame(
-      Estimate = formatC(est, digits = 3, format = "f"),
-      `Std. Error` = formatC(se, digits = 3, format = "f"),
-      `P-value` = formatC(p, digits = 3, format = "f"),
-      row.names = variables,
-      check.names = FALSE
-    )
-    
-    print(summary_df)
+  for (i in seq_along(models)) {
+    cat("---- Quantile =", formatC(levels[i], format = "f", digits = 2), "----\n")
+    print(summary(models[[i]], ...))
     cat("\n")
   }
   
@@ -155,8 +137,7 @@ summary.fars <- function(object, ...) {
 #' @method summary fars_scenario
 #' @export
 summary.fars_scenario <- function(object, ...) {
-  stopifnot(inherits(object, "fars_scenario"))
-  
+
   cat("FARS Scenario Summary\n")
   cat("======================\n")
   cat("Number of periods    :", object$periods, "\n")
@@ -199,7 +180,6 @@ summary.fars_scenario <- function(object, ...) {
 #' @method summary fars_density
 #' @export
 summary.fars_density <- function(object, ...) {
-  stopifnot(inherits(object, "fars_density"))
   
   cat("FARS Density Summary\n")
   cat("=========================\n")

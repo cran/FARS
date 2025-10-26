@@ -1,6 +1,6 @@
 #' @title Generic Function to Extract Distribution 
 #'
-#' @param x An object from which to extract the distribution.
+#' @param object An object from which to extract the distribution.
 #' @param ... Additional arguments (ignored).
 #'
 #' @return A matrix containing the random draws from the fitted skew-t distribution.
@@ -14,7 +14,7 @@
 #' }
 #'
 #' @export
-get_distribution <- function(x, ...) {
+get_distribution <- function(object, ...) {
   UseMethod("get_distribution")
 }
 
@@ -22,7 +22,7 @@ get_distribution <- function(x, ...) {
 #'
 #' @description Extracts the distribution from a \code{fars_density} object. 
 #'
-#' @param x An object of class \code{fars_density}.
+#' @param object An object of class \code{fars_density}.
 #' @param ... Further arguments (ignored).
 #'
 #' @return A matrix containing the random draws from the fitted skew-t distribution if available, otherwise NULL.
@@ -33,13 +33,13 @@ get_distribution <- function(x, ...) {
 #' get_distribution(fars_density_result)
 #'}
 #' @export
-get_distribution.fars_density <- function(x, ...) {
-  if (!inherits(x, "fars_density")) {
-    stop("x must be a 'fars_density' object")
+get_distribution.fars_density <- function(object, ...) {
+  if (!inherits(object, "fars_density")) {
+    stop("object must be a 'fars_density' object")
   }
   
-  if (!is.null(x$distribution)) {
-    return(x$distribution)
+  if (!is.null(object$distribution)) {
+    return(object$distribution)
   }
   NULL
 }

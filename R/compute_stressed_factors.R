@@ -2,82 +2,85 @@
 #'
 #' @description Computes stressed factors.
 #'
-#' @param dep_variable A numeric vector representing the dependent variable (e.g., GDP growth, inflation).
-#' @param factors A matrix or data frame of factor estimates, typically extracted from an MLDFM model.
-#' @param ellipsoids A list of matrices, where each matrix represents a stressed ellipsoid for a given time period. 
-#' @param h Integer representing the forecast horizon (in time steps). It defines the lag used in regression.
-#' @param qtau Numeric. The quantile level used in quantile regression (default is 0.05).
-#' @param min Logical. If \code{TRUE}, the function uses a stepwise minimization method. If \code{FALSE}, it uses a stepwise maximization method.
+#' @param dep_variable Numeric vector of length T representing the dependent variable (e.g., GDP growth, inflation).
+#' @param factors Numeric matrix or data frame of dimension T x r, containing factor estimates.
+#' @param ellipsoids List of matrices. Each matrix represents a stressed ellipsoid for a given time period. 
+#' @param h Integer (>= 1). Lag order used in the regression (default = 1)
+#' @param qtau Numeric between 0 and 1. The quantile level used in quantile regression (default = 0.05).
+#' @param direction Character, either "min" or "max". Determines whether to minimize or maximize
 #'
-#' @return A matrix of stressed factors, with each row representing a time period and each column representing a factor.
+#' @return A numeric matrix of dimension T x r containing the stressed factors for each time period.
 #'
+#' @examples
+#' set.seed(42)
+#' T <- 100; r <- 3
+#' Y <- rnorm(T)
+#' F <- matrix(rnorm(T * r), T, r)          
+#' E <- replicate(T, matrix(rnorm(50 * r), nrow = 50, ncol = r), simplify = FALSE)
+#' stressed_factors <- compute_stressed_factors(Y, F, E, h = 1, qtau = 0.05, direction = "min")
+#' 
 #' @import quantreg
 #' @importFrom stats as.formula
 #' 
-#' @keywords internal
-compute_stressed_factors <- function(dep_variable, factors, ellipsoids, h, qtau, min) {
+#' @export
+compute_stressed_factors <- function(dep_variable, 
+                                     factors, 
+                                     ellipsoids, 
+                                     h = 1, 
+                                     qtau = 0.05, 
+                                     direction = c("min", "max")) {
   
+  # Check parameters
+  direction <- match.arg(direction)
   
-  t <- nrow(factors)
+  if (!is.numeric(dep_variable)) stop("dep_variable must be numeric.")
+  if (is.data.frame(factors)) factors <- as.matrix(factors)
+  if (!is.matrix(factors)) stop("factors must be a matrix or data.frame.")
+  Tn <- length(dep_variable)
+  if (nrow(factors) != Tn) stop("factors must have T rows (same as dep_variable).")
   r <- ncol(factors)
-
+  if (r < 1) stop("factors must have at least one column.")
+  if (!is.numeric(h) || h < 1) stop("h must be integer >= 1.")
+  if (!(qtau > 0 && qtau < 1)) stop("qtau must be in (0,1).")
+  if (!is.list(ellipsoids) || length(ellipsoids) < 1) {
+    stop("ellipsoids must be a non-empty list.")
+  }
   
-  
-  # Prepare regression data
+  # Lag variables
   Y <- dep_variable
-  LagY<-shift(Y,h)
+  LagY <- c(rep(NA_real_, h), dep_variable[1:(Tn - h)])
+  LagF <- rbind(
+    matrix(NA_real_, nrow = h, ncol = r),
+    factors[1:(Tn - h), , drop = FALSE]
+  )
   
-  shifted_factors <- matrix(NA, nrow = nrow(factors), ncol = r)
-  for (i in 1:r) {
-    shifted_factors[,i] <- shift( factors[,i],h)
-  }
-
-  # Build regression dataset
-  reg_data <- data.frame(Y = Y, LagY = LagY)
-  reg_data <- cbind(reg_data, shifted_factors)  
-  names(reg_data)[1:2] <- c("Y", "LagY")
-  new_factor_names <- paste("factor", 1:r, sep = "")  
-  names(reg_data)[3:(2 + r)] <- new_factor_names  
-  factor_names_concat <- paste(new_factor_names, collapse = " + ")
+  X_full <- cbind(Intercept = 1, LagY = LagY, LagF)
+  idx <- stats::complete.cases(X_full)  
+  X <- X_full[idx, , drop = FALSE]
+  y <- Y[idx]
   
-  # Build formula
-  formula <- as.formula(paste("Y ~ LagY", factor_names_concat, sep = " + "))
-
-  # qreg
-  fit_q <- rq(formula, tau = qtau, data = reg_data)
-  summary_fit <- summary(fit_q, se = "ker",covariance=TRUE)
-  coefficients <- summary_fit$coefficients[, 1]
- 
+  # Quantile regression
+  fit <- quantreg::rq.fit(x = X, y = y, tau = qtau)
   
-  # Initialize stressed factor matrix
-  stressed_factors <- matrix(NA, nrow = t, ncol = r)
+  # Minimization/maximization
+  beta <- as.numeric(fit$coefficients)
+  beta0 <- beta[1]
+  beta1 <- beta[2]
+  beta_f <- beta[-c(1,2)]     
   
-  # Loop over time to compute stressed factors
-  for (tt in 1:t){
+  stressed_factors <- matrix(NA_real_, nrow = Tn, ncol = r)
+  
+  for (tt in 1:Tn) {
     ellips <- ellipsoids[[tt]]
-    pred <- coefficients[1] + coefficients[2] * Y[tt] + ellips %*% coefficients[3:(2 + r)]
-    index <- if (min) which.min(pred) else which.max(pred)
-    stressed_factors[tt, ] <- ellips[index, ]
+    if (!is.matrix(ellips)) {
+      ellips <- as.matrix(ellips)
+    }
     
+    pred <- as.numeric(beta0 + beta1 * Y[tt] + ellips %*% beta_f)
+    pick <- if (direction == "min") which.min(pred) else which.max(pred)
+    stressed_factors[tt,] <- ellips[pick,]
   }
-   
   
   return(stressed_factors)
-
-}
-
-
-#' Shift a time series vector
-#' @keywords internal
-shift <- function(x, lag) {
-  n <- length(x)
-  xnew <- rep(NA, n)
-  if (lag < 0) {
-    xnew[1:(n-abs(lag))] <- x[(abs(lag)+1):n]
-  } else if (lag > 0) {
-    xnew[(lag+1):n] <- x[1:(n-lag)]
-  } else {
-    xnew <- x
-  }
-  return(xnew)
+  
 }

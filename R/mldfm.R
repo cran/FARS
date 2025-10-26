@@ -19,6 +19,7 @@
 #'   \item{factors}{Matrix of estimated factors.}
 #'   \item{loadings}{Matrix of factor loadings.}
 #'   \item{residuals}{Matrix of residuals.}
+#'   \item{fitted}{Matrix of fitted values.}
 #'   \item{method}{Initialization method used (CCA or PCA).}
 #'   \item{iterations}{Number of iterations before convergence.}
 #'   \item{factors_list}{List of estimated factors for each node.}
@@ -66,6 +67,7 @@ mldfm <- function(data, blocks = 1, block_ind = NULL, global = 1, local = NULL, 
       factors      = result$factors,
       loadings     = result$loadings,
       residuals    = result$residuals,
+      fitted       = result$fitted,
       method       = result$method,
       iterations   = result$iterations,
       factors_list = result$factors_list,

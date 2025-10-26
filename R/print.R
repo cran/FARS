@@ -10,8 +10,7 @@
 #' @method print mldfm
 #' @export
 print.mldfm <- function(x, ...) {
-  stopifnot(inherits(x, "mldfm"))
-  factors <- get_factors(x)
+  factors <- factors(x)
   
   cat("Multilevel Dynamic Factor Model (MLDFM)\n")
   cat("=======================================\n")
@@ -46,7 +45,6 @@ print.mldfm <- function(x, ...) {
 #' @method print mldfm_subsample
 #' @export
 print.mldfm_subsample <- function(x, ...) {
-  stopifnot(inherits(x, "mldfm_subsample"))
   
   cat("MLDFM Subsampling\n")
   cat("==========================\n")
@@ -87,22 +85,15 @@ print.mldfm_subsample <- function(x, ...) {
 #' @method print fars
 #' @export
 print.fars <- function(x, ...) {
-  stopifnot(inherits(x, "fars"))
   
   cat("Factor-Augmented Quantile Regressions (FARS)\n")
   cat("===========================================\n")
   
   # Summary of forecasted quantiles
-  cat("Forecasted quantiles\n")
-  cat("Number of periods: ", nrow(x$quantiles), "\n")
-  cat("Quantile levels: ", formatC(x$levels, format = "f", digits = 2), "\n")
-  
-  # Check if stressed quantiles are available
-  if (!is.null(x$stressed_quantiles)) {
-    cat("Stressed quantiles: YES\n")
-  } else {
-    cat("Stressed quantiles: NO\n")
-  }
+  cat("Number of periods: ", x$periods, "\n")
+  cat("Number of factors: ", x$n_factors, "\n")
+  cat("Lag: ", x$h, "\n")
+  cat("Quantile levels: ", formatC(get_quantile_levels(x), format = "f", digits = 2), "\n")
   
   invisible(x)
 }
@@ -123,7 +114,6 @@ print.fars <- function(x, ...) {
 #' @method print fars_scenario
 #' @export
 print.fars_scenario <- function(x, ...) {
-  stopifnot(inherits(x, "fars_scenario"))
   
   cat("FARS Scenario\n")
   cat("=====================\n")
@@ -153,7 +143,6 @@ print.fars_scenario <- function(x, ...) {
 #' @method print fars_density
 #' @export
 print.fars_density <- function(x, ...) {
-  stopifnot(inherits(x, "fars_density"))
   cat("FARS Density\n")
   cat("====================\n")
   cat("Time observations  :", nrow(x$density), "\n")
