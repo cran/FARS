@@ -72,7 +72,8 @@ create_scenario <- function(model, subsamples, alpha = 0.95, fpr = FALSE) {
   center_matrix <- factors
   
   # Compute (L'L / N)^(-1)
-  inv_loadings <- solve(crossprod(loadings) / n_var)
+  inv_loadings <- n_var * chol2inv(chol(crossprod(loadings)))
+  
   
   # Align factor signs once per subsample
   align_one <- function(Fs, F0) {
@@ -126,7 +127,8 @@ create_scenario <- function(model, subsamples, alpha = 0.95, fpr = FALSE) {
     sigma_obs  <- sigma_list[[obs]]
     
     if (tot_n_factors > 2) {
-      h_ellip <- hyperellipsoid(center_obs, solve(sigma_obs), calpha)
+      Prec <- chol2inv(chol(sigma_obs))
+      h_ellip <- hyperellipsoid(center_obs, Prec, calpha)
       hyper_ellipsoids[[obs]] <- t(hypercube_mesh(8, h_ellip, TRUE))
     } else if (tot_n_factors == 2) {
       hyper_ellipsoids[[obs]] <- ellipse(sigma_obs, centre = center_obs, level = alpha, npoints = 300)

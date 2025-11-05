@@ -270,8 +270,8 @@ plot_factors.mldfm <- function(x, dates = NULL, flip = NULL, fpr = FALSE, ...) {
   
   # Compute standard deviation for confidence bands
   SD <- vector("list", T_obs)
-  PP <- solve(crossprod(loadings) / N_vars)
-  
+  PP <- N_vars * chol2inv(chol(crossprod(loadings)))
+
   # Compute FPR gamma if needed
   if(fpr){
     gamma <- compute_fpr_gamma(residuals, loadings)

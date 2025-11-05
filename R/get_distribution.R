@@ -34,10 +34,6 @@ get_distribution <- function(object, ...) {
 #'}
 #' @export
 get_distribution.fars_density <- function(object, ...) {
-  if (!inherits(object, "fars_density")) {
-    stop("object must be a 'fars_density' object")
-  }
-  
   if (!is.null(object$distribution)) {
     return(object$distribution)
   }

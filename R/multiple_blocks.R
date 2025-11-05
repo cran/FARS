@@ -80,8 +80,7 @@ multiple_blocks<-function(data, global, local, middle_layer, block_ind, tol, max
     # Update factors
     LtL <- tcrossprod(loadings)                    # r x r
     LDt <- loadings %*% t(data)                    # r x T
-    final_factors <- t(solve(LtL, LDt))            # T x r
-    #final_factors <- t(solve(loadings %*% t(loadings)) %*% loadings %*% t(data))
+    final_factors <- t(qr.solve(LtL, LDt))         # T x r
     
     # Update factor list
     factor_list <- update_factor_list(factor_list, final_factors, r_list)

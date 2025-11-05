@@ -195,4 +195,31 @@ predict.fars <- function(object, newdata, ...) {
   pred_mat
 }
 
+#' @title Log-Likelihoods for \code{fars} Object
+#'
+#' @description Returns the log-likelihood for each quantile regression stored
+#' in a \code{fars} object.
+#'
+#' @param object An object of class \code{fars}.
+#' @param ... Additional arguments (ignored).
+#'
+#' @return A named numeric vector with one element per quantile level.
+#'
+#' @examples
+#' fars_result <- compute_fars(dep_variable = rnorm(100),
+#'                             factors = matrix(rnorm(100 * 3), ncol = 3))
+#' logLik(fars_result)
+#'
+#' @method logLik fars
+#' @export
+logLik.fars <- function(object, ...) {
+  levels <- get_quantile_levels(object)
+  models <- object$models
+  
+  ll_vec <- sapply(models, function(m) as.numeric(logLik(m)))
+  names(ll_vec) <- formatC(levels, format = "f", digits = 2)
+  
+  round(ll_vec, 3)
+}
+
 
