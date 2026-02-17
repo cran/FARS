@@ -4,36 +4,17 @@
 \alias{apply_identifications}
 \title{Apply Identification Constraints to Factors and Loadings}
 \usage{
-apply_identifications(
-  data,
-  num_blocks,
-  ranges,
-  r_list,
-  current_factors,
-  factor_list,
-  loadings_list
-)
+apply_identifications(factors, loadings)
 }
 \arguments{
-\item{data}{A numeric matrix or data frame containing the observed time series (T × N).}
+\item{factors}{A numeric matrix with the current estimate of all factors (T × total factors).}
 
-\item{num_blocks}{Integer. The number of blocks.}
-
-\item{ranges}{A list of vectors with the column indices corresponding to each block.}
-
-\item{r_list}{A named list specifying the number of factors for each node (from \code{build_factor_structure}).}
-
-\item{current_factors}{A numeric matrix with the current estimate of all factors (T × total factors).}
-
-\item{factor_list}{A named list of factors per node (from \code{compute_initial_factors}).}
-
-\item{loadings_list}{A named list of loadings per node.}
+\item{loadings}{A numeric matrix with the current estimate of all factor loadings (total factors x N).}
 }
 \value{
 A list containing:
 \describe{
-\item{factor_list}{An updated named list of identified factors.}
-\item{final_factors}{A matrix containing identified factors.}
+\item{factors}{A matrix containing identified factors.}
 \item{loadings}{A matrix of identified factor loadings.}
 }
 }

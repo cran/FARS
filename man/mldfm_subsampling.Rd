@@ -14,6 +14,8 @@ mldfm_subsampling(
   method = 0,
   tol = 1e-06,
   max_iter = 1000,
+  center = TRUE,
+  scale = TRUE,
   n_samples = 10,
   sample_size = 0.9,
   seed = NULL
@@ -37,6 +39,10 @@ mldfm_subsampling(
 \item{tol}{Numeric. The tolerance level for the residual sum of squares (RSS) minimization process. Used as a convergence criterion.}
 
 \item{max_iter}{Integer. The maximum number of iterations allowed for the RSS minimization process.}
+
+\item{center}{Logical. If \code{TRUE} (default) center data columns.}
+
+\item{scale}{Logical. If \code{TRUE} (default) scale data columns.}
 
 \item{n_samples}{Number of subsamples to generate.}
 

@@ -12,6 +12,8 @@
 #' @param method Integer.  Method used to initialize the factors: \code{0} for Canonical Correlation Analysis (CCA), \code{1} for Principal Component Analysis (PCA).
 #' @param tol Numeric. The tolerance level for the residual sum of squares (RSS) minimization process. Used as a convergence criterion.
 #' @param max_iter Integer. The maximum number of iterations allowed for the RSS minimization process.
+#' @param center Logical. If \code{TRUE} (default) center data columns.
+#' @param scale Logical. If \code{TRUE} (default) scale data columns.
 #' @param verbose Logical. If \code{TRUE} (default), print a summary of the mldfm.
 #'
 #' @return An object of class \code{mldfm}, which is a list containing:
@@ -33,7 +35,17 @@
 #' 
 #' 
 #' 
-mldfm <- function(data, blocks = 1, block_ind = NULL, global = 1, local = NULL, middle_layer = NULL, method = 0, tol = 1e-6, max_iter = 1000, verbose = TRUE) {
+mldfm <- function(data, blocks = 1, 
+                  block_ind = NULL, 
+                  global = 1, 
+                  local = NULL, 
+                  middle_layer = NULL, 
+                  method = 0, 
+                  tol = 1e-6, 
+                  max_iter = 1000, 
+                  center = TRUE,
+                  scale = TRUE,
+                  verbose = TRUE) {
   
   # Argument checks
   if (!is.matrix(data) && !is.data.frame(data)) stop("data must be a matrix or data frame.")
@@ -51,8 +63,12 @@ mldfm <- function(data, blocks = 1, block_ind = NULL, global = 1, local = NULL, 
   if (!is.numeric(max_iter) || max_iter < 1) stop("max_iter must be a positive integer.")
   if (!method %in% c(0, 1)) stop("method must be 0 (CCA) or 1 (PCA).")
   
+  if (!is.logical(center) || length(center) != 1) stop("center must be a single logical value (TRUE or FALSE).")
+  if (!is.logical(scale) || length(scale) != 1) stop("scale must be a single logical value (TRUE or FALSE).")
   
+  # Standardize the data 
   data <- as.matrix(data)
+  data <- scale(data, center = center, scale = scale)
   
   if (blocks == 1) {
     result <- single_block(data, r = global)

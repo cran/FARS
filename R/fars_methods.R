@@ -197,29 +197,127 @@ predict.fars <- function(object, newdata, ...) {
 
 #' @title Log-Likelihoods for \code{fars} Object
 #'
-#' @description Returns the log-likelihood for each quantile regression stored
-#' in a \code{fars} object.
+#' @description Returns the log-likelihood for a single quantile regression
+#' stored in a \code{fars} object (selected via \code{tau}).
 #'
 #' @param object An object of class \code{fars}.
+#' @param tau Numeric. Quantile level to select (e.g. 0.50).
 #' @param ... Additional arguments (ignored).
 #'
-#' @return A named numeric vector with one element per quantile level.
+#' @return An object of class \code{"logLik"}, as returned by the
+#' underlying quantile regression model.
 #'
 #' @examples
 #' fars_result <- compute_fars(dep_variable = rnorm(100),
 #'                             factors = matrix(rnorm(100 * 3), ncol = 3))
-#' logLik(fars_result)
+#' logLik(fars_result, tau = 0.50)
 #'
 #' @method logLik fars
 #' @export
-logLik.fars <- function(object, ...) {
+logLik.fars <- function(object, tau, ...) {
   levels <- get_quantile_levels(object)
   models <- object$models
   
-  ll_vec <- sapply(models, function(m) as.numeric(logLik(m)))
-  names(ll_vec) <- formatC(levels, format = "f", digits = 2)
+  if (missing(tau)) {
+    stop(
+      "A 'fars' object contains multiple quantile regressions. ",
+      "Please specify 'tau', e.g. logLik(x, tau = 0.50)."
+    )
+  }
   
-  round(ll_vec, 3)
+  idx <- which(abs(levels - tau) < 1e-12)
+  if (length(idx) != 1L) {
+    stop(
+      "'tau' not found: ",
+      paste(formatC(levels, format = "f", digits = 2), collapse = ", ")
+    )
+  }
+  
+  # ll_vec <- sapply(models, function(m) as.numeric(logLik(m)))
+  # names(ll_vec) <- formatC(levels, format = "f", digits = 2)
+  # round(ll_vec, 3)
+  
+  ll <- stats::logLik(models[[idx]], ...)
+  ll
+}
+
+#' @title AIC for a \code{fars} Object
+#'
+#' @description Computes AIC values for each quantile regression stored in a
+#' \code{fars} object.
+#'
+#' @param object An object of class \code{fars}.
+#' @param ... Additional arguments passed to the underlying \code{AIC()} method.
+#' @param k Numeric. Penalty per parameter (default 2), as in \code{stats::AIC()}.
+#'
+#' @return A named numeric vector of AIC values, one per quantile level.
+#'
+#' @examples
+#' fars_result <- compute_fars(dep_variable = rnorm(100),
+#'                             factors = matrix(rnorm(100 * 3), ncol = 3))
+#' AIC(fars_result)
+#' @method AIC fars
+#' @export
+AIC.fars <- function(object, ..., k = 2) {
+  levels <- get_quantile_levels(object)
+  models <- object$models
+  
+  aic_vec <- vapply(
+    models,
+    function(m) stats::AIC(m, ..., k = k),
+    numeric(1)
+  )
+  
+  names(aic_vec) <- formatC(levels, format = "f", digits = 2)
+  aic_vec
 }
 
 
+#' @title BIC for a \code{fars} Object
+#'
+#' @description Computes BIC values for each quantile regression stored in a
+#' \code{fars} object.
+#'
+#' The number of observations used in the BIC penalty term is computed as
+#' \code{periods - h}, reflecting the effective sample size of the
+#' \code{h}-step-ahead dynamic quantile regression.
+#'
+#' @param object An object of class \code{fars}.
+#' @param ... Additional arguments passed to the underlying \code{logLik()} method.
+#'
+#'
+#' @return A named numeric vector of BIC values, one per quantile level.
+#'
+#' @examples
+#' fars_result <- compute_fars(
+#'   dep_variable = rnorm(100),
+#'   factors = matrix(rnorm(100 * 3), ncol = 3),
+#'   h = 1
+#' )
+#' BIC(fars_result)
+#' @method BIC fars
+#' @importFrom stats BIC
+#' @export
+BIC.fars <- function(object, ...) {
+  
+  
+  Ttot <- object$periods
+  h    <- object$h
+  n    <- Ttot - h
+  
+  levels <- get_quantile_levels(object)
+  models <- object$models
+  
+  bic_vec <- vapply(models, function(m) {
+    ll <- stats::logLik(m, ...)
+    df <- attr(ll, "df")
+    
+    if (is.null(df))
+      stop("Cannot compute BIC: underlying logLik() has no 'df' attribute.")
+    
+    -2 * as.numeric(ll)[1] + log(n) * df
+  }, numeric(1))
+  
+  names(bic_vec) <- formatC(levels, format = "f", digits = 2)
+  bic_vec
+}

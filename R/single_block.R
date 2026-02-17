@@ -22,30 +22,20 @@
 #' @keywords internal
 single_block <- function(data, r) {
   
-  # Standardize the data 
-  X <- scale(data, center = TRUE, scale = TRUE)
-  
   # Dimensions
+  X <- data
   T <- nrow(X)
   N <- ncol(X)
   
   # PCA
   pca_res <- prcomp(X, center = FALSE, scale. = FALSE)
-  factors_tmp <- pca_res$x[, 1:r, drop = FALSE]             # T × r
+  factors_tmp <- pca_res$x[, 1:r, drop = FALSE]               # T × r
   loadings_tmp <- t(pca_res$rotation[, 1:r, drop = FALSE])    # r × N
-
+  
   # Identifications
-  common_component <- factors_tmp %*% loadings_tmp
-  pca_result <- prcomp(common_component, center = FALSE, scale. = FALSE)
-  factors <- pca_result$x[, 1:r, drop = FALSE]
-  factors <- scale(factors, center = TRUE, scale = TRUE)
-  loadings <- qr.solve(factors, common_component)
-
-  # Matrix Format
-  factors <- unname(as.matrix(factors))
-  attr(factors, "scaled:center") <- NULL
-  attr(factors, "scaled:scale") <- NULL
-  loadings <- unname(as.matrix(loadings))
+  id_res <- apply_identifications(factors_tmp, loadings_tmp)
+  factors <- unname(id_res$factors)
+  loadings <- unname(id_res$loadings)
 
   # Fitted 
   fitted <- factors %*% loadings
@@ -57,6 +47,7 @@ single_block <- function(data, r) {
   factors_list <- list()
   factors_list[["1"]] <- r  
   
+  # Number of iteration is always 0 for DFM
   iteration <- 0
   
   return(list(

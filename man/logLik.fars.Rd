@@ -4,23 +4,26 @@
 \alias{logLik.fars}
 \title{Log-Likelihoods for \code{fars} Object}
 \usage{
-\method{logLik}{fars}(object, ...)
+\method{logLik}{fars}(object, tau, ...)
 }
 \arguments{
 \item{object}{An object of class \code{fars}.}
 
+\item{tau}{Numeric. Quantile level to select (e.g. 0.50).}
+
 \item{...}{Additional arguments (ignored).}
 }
 \value{
-A named numeric vector with one element per quantile level.
+An object of class \code{"logLik"}, as returned by the
+underlying quantile regression model.
 }
 \description{
-Returns the log-likelihood for each quantile regression stored
-in a \code{fars} object.
+Returns the log-likelihood for a single quantile regression
+stored in a \code{fars} object (selected via \code{tau}).
 }
 \examples{
 fars_result <- compute_fars(dep_variable = rnorm(100),
                             factors = matrix(rnorm(100 * 3), ncol = 3))
-logLik(fars_result)
+logLik(fars_result, tau = 0.50)
 
 }

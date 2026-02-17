@@ -25,9 +25,6 @@
 #' @keywords internal
 multiple_blocks<-function(data, global, local, middle_layer, block_ind, tol, max_iter, method){
  
-  # Standardize the original data
-  data <- scale(data,TRUE,TRUE)
- 
   # Initialize 
   num_blocks <- length(block_ind) # Number of blocks
   num_obs <- nrow(data) # Total number of observations
@@ -88,7 +85,6 @@ multiple_blocks<-function(data, global, local, middle_layer, block_ind, tol, max
     # Compute RSS and check convergence
     residuals <- data - final_factors %*% loadings
     RSS_new <- Re(sum(residuals^2))
-    
   
     if ((log(RSS_previous) - log(RSS_new)) < tol) break  # Converged
     RSS_previous <- RSS_new
@@ -96,23 +92,19 @@ multiple_blocks<-function(data, global, local, middle_layer, block_ind, tol, max
   }
   
   # --- Step 3: Identification ---
-  id_res <- apply_identifications(data, num_blocks, ranges, r_list, final_factors, factor_list, loadings_list)
-  orthogonal_factors <- id_res$final_factors
-  factor_list <- id_res$factor_list
-  loadings <- id_res$loadings
+  id_res <- apply_identifications(final_factors, loadings)
+  factors <- unname(id_res$factors)
+  loadings <- unname(id_res$loadings)
   
   # Fitted
-  fitted <- orthogonal_factors %*% loadings
+  fitted <- factors %*% loadings
   
   # Final residuals
   residuals <- data - fitted
   
-  # Drop column names
-  orthogonal_factors <- unname(orthogonal_factors)
-  
   # Return results
   return(list(
-    factors = orthogonal_factors,
+    factors = factors,
     loadings = t(loadings),
     residuals = residuals,
     fitted = fitted,

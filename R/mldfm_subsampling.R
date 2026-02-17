@@ -11,6 +11,8 @@
 #' @param method Integer. The method used to initialize the factors: \code{0} for Canonical Correlation Analysis (CCA), \code{1} for Principal Component Analysis (PCA).
 #' @param tol Numeric. The tolerance level for the residual sum of squares (RSS) minimization process. Used as a convergence criterion.
 #' @param max_iter Integer. The maximum number of iterations allowed for the RSS minimization process.
+#' @param center Logical. If \code{TRUE} (default) center data columns.
+#' @param scale Logical. If \code{TRUE} (default) scale data columns.
 #' @param n_samples Number of subsamples to generate.
 #' @param sample_size Proportion of the original sample to retain (e.g., 0.9 for 90%).
 #' @param seed Optional integer. Seed for reproducibility of the subsampling process. If \code{NULL}, random draws will differ each run.
@@ -34,10 +36,20 @@
 #' }
 #' 
 #' @export
-mldfm_subsampling <- function(data, blocks = 1, block_ind = NULL, global = 1, 
-                              local = NULL, middle_layer = NULL, 
-                              method = 0, tol = 1e-6, max_iter = 1000, 
-                              n_samples = 10, sample_size = 0.9, seed = NULL) {
+mldfm_subsampling <- function(data, 
+                              blocks = 1, 
+                              block_ind = NULL, 
+                              global = 1, 
+                              local = NULL, 
+                              middle_layer = NULL, 
+                              method = 0, 
+                              tol = 1e-6, 
+                              max_iter = 1000, 
+                              center = TRUE,
+                              scale = TRUE,
+                              n_samples = 10, 
+                              sample_size = 0.9, 
+                              seed = NULL) {
   
   
   
@@ -58,6 +70,9 @@ mldfm_subsampling <- function(data, blocks = 1, block_ind = NULL, global = 1,
   if (!method %in% c(0, 1)) stop("method must be 0 (CCA) or 1 (PCA).")
   if (!is.numeric(n_samples) || n_samples < 1) stop("n_samples must be a positive integer.")
   if (!is.numeric(sample_size) || sample_size <= 0 || sample_size > 1) stop("sample_size must be a number in (0, 1].")
+  
+  if (!is.logical(center) || length(center) != 1) stop("center must be a single logical value (TRUE or FALSE).")
+  if (!is.logical(scale) || length(scale) != 1) stop("scale must be a single logical value (TRUE or FALSE).")
   
   
   n_obs <- nrow(data)
@@ -84,6 +99,8 @@ mldfm_subsampling <- function(data, blocks = 1, block_ind = NULL, global = 1,
                           method = method, 
                           tol = tol, 
                           max_iter = max_iter,
+                          center = center,
+                          scale = scale,
                           verbose = FALSE)
     
     # Store results
